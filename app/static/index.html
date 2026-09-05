@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>《机器人学导论》课程智能体</title>
+<style>
+:root {
+  --bg: #eef2f9; --card: #ffffff; --primary: #4f6ef7; --primary-dark: #3b4fd8;
+  --primary-2: #7c5cf0; --text: #1c2434; --muted: #7b8496; --border: #e6eaf3;
+  --ok: #16a34a; --warn: #d97706; --bad: #e11d48; --accent: #0891b2;
+  --sidebar-bg: linear-gradient(180deg, #101a33 0%, #0b1224 100%);
+  --shadow-sm: 0 1px 2px rgba(16,24,40,.06), 0 1px 3px rgba(16,24,40,.05);
+  --shadow-md: 0 6px 18px rgba(16,24,40,.08), 0 2px 6px rgba(16,24,40,.04);
+  --shadow-lg: 0 14px 34px rgba(16,24,40,.16), 0 4px 10px rgba(16,24,40,.06);
+  --radius: 14px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  font-family: "Segoe UI", "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+  background: var(--bg); color: var(--text); min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+.layout { display: flex; min-height: 100vh; }
+
+/* ---------- 侧边栏 ---------- */
+.sidebar {
+  width: 238px; flex-shrink: 0; background: var(--sidebar-bg); color: #cbd5e1;
+  display: flex; flex-direction: column; padding: 20px 14px; gap: 14px;
+  position: sticky; top: 0; height: 100vh;
+}
+.brand { display: flex; align-items: center; gap: 11px; padding: 2px 8px 14px; border-bottom: 1px solid rgba(255,255,255,.08); }
+.brand-logo { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; font-size: 22px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-2)); box-shadow: 0 6px 16px rgba(79,110,247,.45); }
+.brand-title { color: #fff; font-size: 15px; font-weight: 700; letter-spacing: .5px; }
+.brand-sub { font-size: 11px; color: #8b97b3; margin-top: 2px; }
+.role-switch { display: flex; background: rgba(255,255,255,.08); border-radius: 10px; padding: 3px; gap: 3px; }
+.role-switch button { flex: 1; border: none; background: none; color: #a5b0c8; padding: 8px 4px; border-radius: 8px;
+  cursor: pointer; font-size: 13px; font-family: inherit; transition: all .18s; }
+.role-switch button.active { background: linear-gradient(135deg, var(--primary), var(--primary-2)); color: #fff;
+  font-weight: 600; box-shadow: 0 4px 12px rgba(79,110,247,.4); }
+nav { display: flex; flex-direction: column; gap: 3px; overflow-y: auto; }
+nav button { display: flex; align-items: center; gap: 10px; border: none; background: none; padding: 10px 12px;
+  font-size: 13.5px; color: #a5b0c8; cursor: pointer; border-radius: 10px; white-space: nowrap;
+  font-family: inherit; text-align: left; transition: all .15s; border-left: 3px solid transparent; }
+nav button .ico { font-size: 15px; width: 20px; text-align: center; }
+nav button:hover { background: rgba(255,255,255,.06); color: #e2e8f0; }
+nav button.active { background: linear-gradient(90deg, rgba(79,110,247,.30), rgba(124,92,240,.14));
+  color: #fff; font-weight: 600; border-left-color: #8ea0ff; }
+.side-footer { margin-top: auto; display: flex; flex-direction: column; gap: 10px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,.08); }
+.status { display: flex; align-items: center; gap: 7px; font-size: 12px; background: rgba(255,255,255,.07);
+  padding: 7px 12px; border-radius: 9px; color: #cbd5e1; }
+.status .dot { width: 8px; height: 8px; border-radius: 50%; background: #9ca3af; flex-shrink: 0; }
+.status.online .dot { background: #4ade80; box-shadow: 0 0 8px #4ade80; animation: pulseDot 2s infinite; }
+.status.offline .dot { background: #f87171; }
+.foot-note { font-size: 10.5px; color: #6b7691; line-height: 1.7; padding: 0 6px; }
+
+/* ---------- 主内容区 ---------- */
+.content { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.topbar { background: rgba(255,255,255,.88); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border);
+  padding: 15px 30px; display: flex; align-items: baseline; gap: 14px; position: sticky; top: 0; z-index: 20; }
+.topbar-title { font-size: 18px; font-weight: 700; color: var(--text); }
+.topbar-sub { font-size: 12px; color: var(--muted); }
+
+main { flex: 1; padding: 24px 30px; max-width: 1180px; width: 100%; margin: 0 auto; }
+.panel { display: none; }
+.panel.active { display: block; animation: fadeUp .3s ease; }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px;
+  box-shadow: var(--shadow-sm); }
+.card + .card { margin-top: 16px; }
+.card h2 { font-size: 15px; margin-bottom: 14px; color: var(--text); font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.card h2::before { content: ""; width: 4px; height: 15px; border-radius: 2px;
+  background: linear-gradient(180deg, var(--primary), var(--primary-2)); }
+.muted { color: var(--muted); font-size: 12px; }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes pulseDot { 0%,100% { opacity: 1; } 50% { opacity: .45; } }
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: #c8d0e0; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #a9b4c8; }
+@media (max-width: 920px) {
+  .layout { flex-direction: column; }
+  .sidebar { width: 100%; height: auto; position: static; gap: 10px; }
+  nav { flex-direction: row; overflow-x: auto; }
+  nav button { border-left: none; border-bottom: 3px solid transparent; }
+  nav button.active { border-bottom-color: #8ea0ff; border-left-color: transparent; }
+  .side-footer { margin-top: 4px; }
+}
+
+/* ---------- 对话 ---------- */
+.chat-layout { display: grid; grid-template-columns: 1fr 300px; gap: 14px; }
+@media (max-width: 860px) { .chat-layout { grid-template-columns: 1fr; } }
+.chat-box { display: flex; flex-direction: column; height: calc(100vh - 240px); min-height: 460px; }
+#messages { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 14px; background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; }
+.msg { max-width: 86%; padding: 10px 14px; border-radius: 12px; font-size: 14px; line-height: 1.7; word-break: break-word; }
+.msg.user { align-self: flex-end; background: var(--primary); color: #fff; border-bottom-right-radius: 3px; }
+.msg.bot { align-self: flex-start; background: var(--card); border: 1px solid var(--border); border-bottom-left-radius: 3px; }
+.msg .badges { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 5px; }
+.badge { font-size: 11px; padding: 2px 8px; border-radius: 10px; background: #eef2ff; color: #4338ca; }
+.badge.ok { background: #dcfce7; color: #15803d; }
+.badge.warn { background: #fef3c7; color: #b45309; }
+.badge.plain { background: #f1f5f9; color: #475569; }
+.msg details { margin-top: 8px; font-size: 12px; }
+.msg summary { cursor: pointer; color: var(--muted); }
+.msg .trace-node { padding: 2px 0; color: #475569; }
+.msg .src { margin-top: 6px; padding: 8px 10px; background: #f8fafc; border-left: 3px solid var(--accent); border-radius: 4px; font-size: 12px; color: #475569; }
+.msg .src b { color: var(--accent); }
+.followup { margin-top: 10px; padding: 8px 12px; border: 1px dashed var(--primary); border-radius: 8px; background: #eff6ff; color: var(--primary-dark); font-size: 13px; cursor: pointer; }
+.followup:hover { background: #dbeafe; }
+.stars { margin-top: 8px; display: flex; align-items: center; gap: 4px; font-size: 13px; color: var(--muted); }
+.stars .star { cursor: pointer; font-size: 17px; color: #cbd5e1; transition: color .15s; }
+.stars .star.on { color: #f59e0b; }
+.input-row { display: flex; gap: 8px; margin-top: 10px; }
+.input-row textarea { flex: 1; resize: none; height: 64px; border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; font-size: 14px; font-family: inherit; outline: none; }
+.input-row textarea:focus { border-color: var(--primary); }
+.btn { border: none; border-radius: 10px; padding: 10px 22px; font-size: 14px; cursor: pointer; background: var(--primary); color: #fff; font-family: inherit; }
+.btn:hover { background: var(--primary-dark); }
+.btn:disabled { background: #93c5fd; cursor: not-allowed; }
+.btn.ghost { background: #fff; color: var(--primary); border: 1px solid var(--primary); }
+.btn.ghost:hover { background: #eff6ff; }
+.btn.sm { padding: 6px 14px; font-size: 13px; border-radius: 8px; }
+.side-info .kv { display: flex; justify-content: space-between; font-size: 13px; padding: 7px 0; border-bottom: 1px dashed var(--border); }
+.side-info .kv:last-of-type { border-bottom: none; }
+.side-info .kv b { color: var(--primary-dark); }
+.welcome { text-align: center; color: var(--muted); margin: auto; font-size: 13px; line-height: 2; }
+
+/* ---------- 表单 / 结果 ---------- */
+.form-row { margin-bottom: 12px; }
+.form-row label { display: block; font-size: 13px; margin-bottom: 5px; color: var(--muted); }
+.form-row textarea, .form-row input, .form-row select { width: 100%; border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px; font-size: 14px; font-family: inherit; outline: none; }
+.form-row textarea:focus, .form-row input:focus { border-color: var(--primary); }
+.score-bar { height: 14px; background: #e2e8f0; border-radius: 7px; overflow: hidden; margin: 10px 0 6px; }
+.score-bar > div { height: 100%; border-radius: 7px; transition: width .4s; }
+.result-box { margin-top: 14px; padding: 14px; background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; font-size: 14px; line-height: 1.8; }
+.result-box .ref { margin-top: 10px; padding: 10px; background: #fffbeb; border-left: 3px solid #f59e0b; font-size: 13px; color: #92400e; }
+
+/* ---------- 学情统计 ---------- */
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 14px; }
+.stat { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; text-align: center; }
+.stat .num { font-size: 26px; font-weight: 700; color: var(--primary); }
+.stat .lab { font-size: 12px; color: var(--muted); margin-top: 4px; }
+.hbar-row { display: grid; grid-template-columns: 130px 1fr 44px; align-items: center; gap: 8px; font-size: 12px; padding: 4px 0; }
+.hbar { height: 16px; background: #eef2ff; border-radius: 4px; overflow: hidden; }
+.hbar > div { height: 100%; background: var(--primary); opacity: .8; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); }
+th { color: var(--muted); font-weight: 500; font-size: 12px; }
+.toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; gap: 10px; flex-wrap: wrap; }
+.toolbar select { border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; font-family: inherit; }
+
+/* ---------- 知识图谱 ---------- */
+.graph-chain { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 10px 0 16px; }
+.g-node { padding: 8px 14px; border: 1.5px solid var(--border); border-radius: 20px; background: #fff; font-size: 13px; cursor: pointer; transition: all .15s; }
+.g-node:hover { border-color: var(--primary); color: var(--primary); }
+.g-node.active { background: var(--primary); border-color: var(--primary); color: #fff; font-weight: 600; }
+.g-arrow { color: var(--muted); font-size: 14px; }
+.graph-detail { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-top: 10px; }
+.g-card { border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; font-size: 13px; line-height: 1.7; background: #f8fafc; }
+.g-card .t { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+.g-card .v { font-weight: 600; color: var(--primary-dark); }
+
+/* ---------- 习题 / 推荐 ---------- */
+.ex-card, .rec-card { border: 1px solid var(--border); border-radius: 10px; padding: 14px; margin-bottom: 10px; }
+.ex-card .q, .rec-card .q { font-size: 14px; font-weight: 600; line-height: 1.7; }
+.ex-card .meta, .rec-card .meta { font-size: 12px; color: var(--muted); margin: 6px 0; }
+.tag { display: inline-block; font-size: 11px; padding: 2px 9px; border-radius: 10px; background: #ecfeff; color: #0e7490; margin-right: 6px; }
+.tag.warn { background: #fef3c7; color: #b45309; }
+.tag.ok { background: #dcfce7; color: #15803d; }
+.rec-card .reason { font-size: 13px; color: #475569; line-height: 1.8; margin: 8px 0; }
+.empty-tip { text-align: center; color: var(--muted); font-size: 13px; padding: 30px 10px; line-height: 2; }
+.list-item { padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; margin-bottom: 7px; background: #f8fafc; display: flex; justify-content: space-between; gap: 10px; }
+
+/* ---------- 工具 ---------- */
+.tool-card { border: 1px solid var(--border); border-radius: 10px; padding: 14px; margin-bottom: 10px; }
+.tool-card h3 { font-size: 14px; color: var(--primary-dark); font-family: Consolas, monospace; }
+.tool-card p { font-size: 13px; color: var(--muted); margin: 6px 0; }
+.tool-card pre { background: #f8fafc; padding: 10px; border-radius: 8px; font-size: 12px; overflow-x: auto; }
+
+/* ---------- 组件增强 ---------- */
+.btn { border: none; border-radius: 10px; padding: 10px 22px; font-size: 14px; cursor: pointer; font-family: inherit;
+  background: linear-gradient(135deg, var(--primary), var(--primary-2)); color: #fff; font-weight: 600;
+  box-shadow: 0 4px 14px rgba(79,110,247,.32); transition: all .18s; }
+.btn:hover { box-shadow: 0 6px 20px rgba(79,110,247,.42); transform: translateY(-1px); }
+.btn:active { transform: translateY(0); }
+.btn:disabled { background: #b9c4e8; box-shadow: none; cursor: not-allowed; transform: none; }
+.btn.ghost { background: #fff; color: var(--primary); border: 1px solid #c9d4f7; box-shadow: none; }
+.btn.ghost:hover { background: #f2f5ff; transform: none; }
+.btn.sm { padding: 7px 15px; font-size: 13px; border-radius: 9px; }
+
+.form-row textarea, .form-row input, .form-row select, .toolbar select {
+  border: 1px solid var(--border); border-radius: 10px; padding: 10px 13px; font-size: 14px;
+  font-family: inherit; outline: none; background: #fbfcfe; transition: all .15s; }
+.form-row textarea:focus, .form-row input:focus, .form-row select:focus, .toolbar select:focus {
+  border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79,110,247,.12); background: #fff; }
+.input-row textarea { border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; background: #fbfcfe; transition: all .15s; }
+.input-row textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79,110,247,.12); background: #fff; }
+
+.chat-box { height: calc(100vh - 205px); }
+#messages { background: linear-gradient(180deg, #f8faff, #f3f6fd); border: 1px solid var(--border);
+  border-radius: 12px; padding: 18px 46px; }
+.msg { max-width: 82%; padding: 11px 15px; border-radius: 14px; font-size: 14px; line-height: 1.75;
+  word-break: break-word; position: relative; animation: fadeUp .3s ease; box-shadow: var(--shadow-sm); }
+.msg.user { align-self: flex-end; background: linear-gradient(135deg, var(--primary), var(--primary-2));
+  color: #fff; border-bottom-right-radius: 4px; }
+.msg.bot { align-self: flex-start; background: #fff; border: 1px solid var(--border); border-bottom-left-radius: 4px; }
+.msg.bot::before, .msg.user::before { position: absolute; top: 0; font-size: 19px; }
+.msg.bot::before { content: "🤖"; left: -38px; }
+.msg.user::before { content: "🧑‍🎓"; right: -38px; }
+@media (max-width: 700px) {
+  #messages { padding: 14px 10px; }
+  .msg::before { display: none; }
+  .msg { max-width: 92%; }
+  .chat-box { height: 58vh; }
+}
+.msg .muted { animation: pulseDot 1.4s infinite; }
+.badge { font-size: 11px; padding: 3px 9px; border-radius: 20px; font-weight: 500; }
+.msg .src { background: #f6f8fd; border-left: 3px solid var(--accent); border-radius: 6px; }
+.followup { border: 1px dashed #8ea0ff; background: #f3f6ff; border-radius: 10px; transition: all .15s; }
+.followup:hover { background: #e8eeff; transform: translateX(2px); }
+.stars .star.on { color: #f59e0b; text-shadow: 0 0 8px rgba(245,158,11,.55); }
+.side-info .kv b { color: var(--primary); }
+.welcome { color: #9aa5bd; }
+
+.stat { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 16px;
+  text-align: left; box-shadow: var(--shadow-sm); transition: all .2s; position: relative; overflow: hidden; }
+.stat:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.stat .num { font-size: 27px; font-weight: 800; background: linear-gradient(135deg, var(--primary), var(--primary-2));
+  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.stat .lab { font-size: 12px; color: var(--muted); margin-top: 4px; }
+.stat::after { content: ""; position: absolute; right: -14px; top: -14px; width: 58px; height: 58px;
+  border-radius: 50%; background: linear-gradient(135deg, rgba(79,110,247,.12), rgba(124,92,240,.06)); }
+
+.hbar > div { background: linear-gradient(90deg, var(--primary), var(--primary-2)); border-radius: 4px; }
+table { border-radius: 10px; overflow: hidden; }
+th { background: #f8faff; }
+
+.g-node { padding: 9px 16px; border: 1.5px solid var(--border); border-radius: 22px; background: #fff;
+  font-size: 13px; font-weight: 500; box-shadow: var(--shadow-sm); transition: all .18s; }
+.g-node:hover { border-color: var(--primary); color: var(--primary); transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.g-node.active { background: linear-gradient(135deg, var(--primary), var(--primary-2)); border-color: transparent;
+  color: #fff; font-weight: 600; box-shadow: 0 6px 16px rgba(79,110,247,.4); }
+.g-card { background: linear-gradient(160deg, #f8faff, #f3f6fd); border: 1px solid var(--border); border-radius: 12px; }
+.g-card .v { color: var(--primary-dark); }
+
+.ex-card, .rec-card { border: 1px solid var(--border); border-radius: var(--radius); padding: 16px;
+  margin-bottom: 12px; background: #fff; box-shadow: var(--shadow-sm); transition: all .2s; }
+.ex-card:hover, .rec-card:hover { box-shadow: var(--shadow-md); border-color: #d6def5; }
+.tag { border-radius: 20px; font-weight: 500; }
+.list-item { background: #f8faff; border-radius: 10px; border: 1px solid #eef1f8; transition: background .15s; }
+.list-item:hover { background: #f0f4ff; }
+.result-box { background: linear-gradient(160deg, #f8faff, #f4f7fd); border-radius: 12px; }
+
+.tool-card { border-radius: 12px; transition: all .2s; }
+.tool-card:hover { box-shadow: var(--shadow-md); border-color: #d6def5; }
+.tool-card h3 { color: var(--primary-dark); }
+.tool-card pre { background: #0f172a; color: #c7d2fe; border-radius: 10px; }
+
+#toast { position: fixed; top: 22px; left: 50%; transform: translateX(-50%); background: rgba(17,24,39,.92);
+  backdrop-filter: blur(8px); color: #fff; padding: 11px 22px; border-radius: 12px; font-size: 13px;
+  display: none; z-index: 99; box-shadow: var(--shadow-lg); }
+</style>
+<script>
+window.MathJax = {
+  tex: { inlineMath: [["\\(", "\\)"]], displayMath: [["\\[", "\\]"]] },
+  svg: { fontCache: "global" },
+  startup: { typeset: false }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-logo">🤖</div>
+      <div>
+        <div class="brand-title">机器人学导论</div>
+        <div class="brand-sub">课程 AI 智能体教学平台</div>
+      </div>
+    </div>
+    <div class="role-switch">
+      <button id="roleStudent" class="active">🎓 学生端</button>
+      <button id="roleTeacher">👨‍🏫 教师端</button>
+    </div>
+    <nav id="nav">
+      <button class="active" data-tab="chat" data-role="student"><span class="ico">💬</span><span class="lab">智能问答</span></button>
+      <button data-tab="graph" data-role="student"><span class="ico">🕸️</span><span class="lab">知识图谱</span></button>
+      <button data-tab="videos" data-role="student"><span class="ico">🎬</span><span class="lab">视频课程</span></button>
+      <button data-tab="course" data-role="student"><span class="ico">📋</span><span class="lab">课程信息</span></button>
+      <button data-tab="exercise" data-role="student"><span class="ico">📝</span><span class="lab">习题自测</span></button>
+      <button data-tab="recommend" data-role="student"><span class="ico">✨</span><span class="lab">学习推荐</span></button>
+      <button data-tab="self" data-role="student"><span class="ico">📈</span><span class="lab">自我评估</span></button>
+      <button data-tab="insight" data-role="teacher"><span class="ico">📊</span><span class="lab">学情看板</span></button>
+      <button data-tab="weak" data-role="teacher"><span class="ico">⚠️</span><span class="lab">薄弱知识点</span></button>
+      <button data-tab="export" data-role="teacher"><span class="ico">📥</span><span class="lab">数据导出</span></button>
+      <button data-tab="tools" data-role="teacher"><span class="ico">🔧</span><span class="lab">MCP 工具</span></button>
+    </nav>
+    <div class="side-footer">
+      <div class="status" id="status"><span class="dot"></span><span id="statusText">连接中…</span></div>
+      <div class="foot-note">成都理工大学 2025 年度 AI 研究基金<br>项目 2025AI068 · FastAPI + RAG</div>
+    </div>
+  </aside>
+  <div class="content">
+    <div class="topbar">
+      <span class="topbar-title" id="topbarTitle">智能问答</span>
+      <span class="topbar-sub">《机器人学导论》课程智能体 · 会话 30 分钟超时</span>
+    </div>
+<main>
+  <!-- ============ 学生：智能问答 ============ -->
+  <section class="panel active" id="panel-chat">
+    <div class="chat-layout">
+      <div class="card chat-box">
+        <div id="messages">
+          <div class="welcome">
+            你好！我是《机器人学导论》课程 AI 助教。<br>
+            可以向我提问课程知识（运动学、动力学、轨迹规划、控制系统……），<br>
+            也支持多轮追问；回答后可通过星星评分反馈质量。
+          </div>
+        </div>
+        <div class="input-row">
+          <textarea id="chatInput" placeholder="输入你的问题，Ctrl+Enter 发送…" maxlength="2000"></textarea>
+          <button class="btn" id="sendBtn">发送</button>
+        </div>
+      </div>
+      <div class="card side-info">
+        <h2>会话信息</h2>
+        <div class="kv"><span>会话状态</span><b id="sidState">未开始</b></div>
+        <div class="kv"><span>会话 ID</span><b id="sidVal">—</b></div>
+        <div class="kv"><span>累计轮次</span><b id="turnCount">0</b></div>
+        <div style="margin-top:14px"><button class="btn ghost" id="newSessionBtn" style="width:100%">开始新会话</button></div>
+        <p class="muted" style="margin-top:12px; line-height:1.8">
+          学生端包含：智能问答、知识图谱可视化、习题自测、个性化学习推荐、自我评估五个模块，
+          学习数据将汇入教师端学情看板。
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 学生：知识图谱 ============ -->
+  <section class="panel" id="panel-graph">
+    <div class="card">
+      <h2>课程知识图谱（章节前置 / 后继关系）</h2>
+      <p class="muted">点击章节节点查看前置知识、后继章节与学习目标；也可输入任意知识点查询。</p>
+      <div class="graph-chain" id="graphChain"><span class="muted">加载中…</span></div>
+      <div class="graph-detail" id="graphDetail"></div>
+    </div>
+    <div class="card">
+      <h2>知识点关系查询</h2>
+      <div class="input-row" style="margin-top:0">
+        <input id="graphSearchInput" placeholder="输入知识点，如：雅可比矩阵、轨迹规划" style="flex:1;border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:14px;outline:none">
+        <button class="btn" id="graphSearchBtn">查询</button>
+      </div>
+      <div id="graphSearchResult" class="muted" style="margin-top:10px"></div>
+    </div>
+  </section>
+
+  <!-- ============ 学生：视频课程 ============ -->
+  <section class="panel" id="panel-videos">
+    <div class="card">
+      <div class="toolbar">
+        <h2 style="margin:0">视频课程学习（按章节）</h2>
+        <button class="btn sm" id="videoRefreshBtn">刷新</button>
+      </div>
+      <p class="muted">课程配套教学视频，点击卡片直接播放；智能问答命中相关章节知识点时也会自动推荐对应视频。</p>
+      <div id="videoList"><span class="muted">加载中…</span></div>
+    </div>
+  </section>
+
+  <!-- ============ 学生：课程信息 ============ -->
+  <section class="panel" id="panel-course">
+    <div class="card">
+      <div class="toolbar">
+        <h2 style="margin:0">课程信息（教学大纲）</h2>
+        <button class="btn sm" id="courseRefreshBtn">刷新</button>
+      </div>
+      <div id="courseContent"><span class="muted">加载中…</span></div>
+    </div>
+  </section>
+
+  <!-- ============ 学生：习题自测 ============ -->
+  <section class="panel" id="panel-exercise">
+    <div class="card">
+      <div class="toolbar">
+        <h2 style="margin:0">习题自测（题库随机抽题，自动批阅）</h2>
+        <button class="btn sm" id="exRefreshBtn">换一批题</button>
+      </div>
+      <div id="exList"><span class="muted">加载中…</span></div>
+    </div>
+  </section>
+
+  <!-- ============ 学生：学习推荐 ============ -->
+  <section class="panel" id="panel-recommend">
+    <div class="card">
+      <h2>个性化学习推荐</h2>
+      <p class="muted">基于你的问答命中情况与自测成绩生成：未命中问题 → 知识补强；低分习题 → 前置章节复习。</p>
+      <div id="recList" style="margin-top:12px"><span class="muted">加载中…</span></div>
+    </div>
+  </section>
+
+  <!-- ============ 学生：自我评估 ============ -->
+  <section class="panel" id="panel-self">
+    <div class="toolbar"><h2 style="font-size:15px;color:var(--primary-dark);margin:0">我的学习画像</h2>
+      <button class="btn sm" id="selfRefreshBtn">刷新</button></div>
+    <div class="stat-grid" id="selfCards"></div>
+    <div class="card"><h2>未命中知识库的问题（建议补强）</h2><div id="selfMissed" class="muted">暂无数据</div></div>
+    <div class="card"><h2>待订正习题（得分 &lt; 0.6）</h2><div id="selfWeak" class="muted">暂无数据</div></div>
+  </section>
+
+  <!-- ============ 教师：学情看板 ============ -->
+  <section class="panel" id="panel-insight">
+    <div class="toolbar">
+      <h2 style="font-size:15px;color:var(--primary-dark);margin:0">学情统计汇总（教师端）</h2>
+      <div>
+        <span class="muted">统计范围</span>
+        <select id="insightDays">
+          <option value="7">近 7 天</option>
+          <option value="30" selected>近 30 天</option>
+          <option value="90">近 90 天</option>
+          <option value="365">近一年</option>
+        </select>
+        <button class="btn sm" id="insightBtn">刷新</button>
+      </div>
+    </div>
+    <div class="stat-grid" id="statCards"></div>
+    <div class="card"><h2>每日提问量</h2><div id="dailyChart" class="muted">暂无数据</div></div>
+    <div class="card"><h2>意图分布</h2><div id="intentChart" class="muted">暂无数据</div></div>
+  </section>
+
+  <!-- ============ 教师：薄弱知识点 ============ -->
+  <section class="panel" id="panel-weak">
+    <div class="toolbar">
+      <h2 style="font-size:15px;color:var(--primary-dark);margin:0">薄弱知识点统计</h2>
+      <div>
+        <span class="muted">统计范围</span>
+        <select id="weakDays">
+          <option value="7">近 7 天</option>
+          <option value="30" selected>近 30 天</option>
+          <option value="90">近 90 天</option>
+          <option value="365">近一年</option>
+        </select>
+        <button class="btn sm" id="weakBtn">刷新</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>作业薄弱点（得分 &lt; 0.6 的题目来源聚类）</h2>
+      <div id="weakTable" class="muted">暂无数据</div>
+      <p class="muted" style="margin-top:10px;line-height:1.8">教学建议：错误次数多且平均分低的题目来源应在课堂上重点讲评；
+        可结合「知识图谱」定位该内容的前置章节，安排复习顺序。</p>
+    </div>
+    <div class="card"><h2>学生提问意图分布</h2><div id="weakIntent" class="muted">暂无数据</div></div>
+  </section>
+
+  <!-- ============ 教师：数据导出 ============ -->
+  <section class="panel" id="panel-export">
+    <div class="card">
+      <h2>教学数据导出（CSV，Excel 可直接打开）</h2>
+      <div class="form-row" style="margin-top:10px">
+        <label>导出数据范围</label>
+        <select id="exportDays">
+          <option value="7">近 7 天</option>
+          <option value="30" selected>近 30 天</option>
+          <option value="90">近 90 天</option>
+          <option value="365">近一年</option>
+        </select>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
+        <a class="btn" id="exportInteractions" download>导出交互记录</a>
+        <a class="btn" id="exportHomework" download>导出作业批阅</a>
+        <a class="btn" id="exportFeedback" download>导出学生反馈</a>
+      </div>
+      <p class="muted" style="margin-top:14px;line-height:1.8">
+        交互记录含每轮问答的意图、是否命中知识库、相似度、生成模式；作业批阅含题目、作答、得分与反馈；
+        学生反馈含评分与补充意见。
+      </p>
+    </div>
+  </section>
+
+  <!-- ============ 教师：MCP 工具 ============ -->
+  <section class="panel" id="panel-tools">
+    <div class="card">
+      <h2>统一 MCP 协议工具清单（tools/list）</h2>
+      <p class="muted" style="margin-bottom:12px">智能体能力以 MCP 工具形式注册，可供学校教学平台或其他智能体系统通过 JSON-RPC 2.0 调用（stdio 服务：<code>python -m app.mcp.server</code>）。</p>
+      <div id="toolsList"><span class="muted">加载中…</span></div>
+    </div>
+  </section>
+</main>
+  </div>
+</div>
+<div id="toast"></div>
+<div id="videoModal" style="display:none;position:fixed;inset:0;z-index:98;background:rgba(10,16,34,.78);align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:16px;padding:16px;width:min(900px,94vw);box-shadow:0 20px 60px rgba(0,0,0,.4);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <div id="videoModalTitle" style="font-size:15px;font-weight:700;color:#1c2434;"></div>
+      <button id="videoModalClose" style="border:none;background:#f1f5f9;border-radius:8px;padding:6px 14px;cursor:pointer;font-size:13px;color:#475569;">✕ 关闭</button>
+    </div>
+    <video id="videoPlayer" controls style="width:100%;max-height:72vh;background:#000;border-radius:10px;"></video>
+  </div>
+</div>
+
+<script>
+"use strict";
+const $ = (id) => document.getElementById(id);
+const state = { sessionId: null, turns: 0, role: "student", exercises: [], chapters: [], videosCache: [] };
+
+/* ---------- 通用 ---------- */
+function toast(msg) {
+  const t = $("toast"); t.textContent = msg; t.style.display = "block";
+  clearTimeout(t._h); t._h = setTimeout(() => t.style.display = "none", 2600);
+}
+function esc(s) {
+  return String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+function fmt(s) {
+  return esc(s).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>").replace(/\n/g, "<br>");
+}
+async function api(path, opts) {
+  const resp = await fetch(path, opts);
+  const data = await resp.json().catch(() => ({}));
+  if (!resp.ok) throw new Error(data.detail || ("HTTP " + resp.status));
+  return data;
+}
+async function ensureSession() {
+  if (state.sessionId) return state.sessionId;
+  const r = await api("/v1/sessions", { method: "POST" });
+  state.sessionId = r.session_id;
+  updateSide();
+  return r.session_id;
+}
+
+/* ---------- 角色与标签页 ---------- */
+function setRole(role) {
+  state.role = role;
+  $("roleStudent").classList.toggle("active", role === "student");
+  $("roleTeacher").classList.toggle("active", role === "teacher");
+  document.querySelectorAll("nav button").forEach(b => {
+    b.style.display = b.dataset.role === role ? "" : "none";
+  });
+  const first = document.querySelector(`nav button[data-role="${role}"]`);
+  if (first) switchTab(first.dataset.tab);
+}
+$("roleStudent").addEventListener("click", () => setRole("student"));
+$("roleTeacher").addEventListener("click", () => setRole("teacher"));
+
+function switchTab(tab) {
+  document.querySelectorAll("nav button").forEach(b =>
+    b.classList.toggle("active", b.dataset.tab === tab && b.dataset.role === state.role));
+  document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+  $("panel-" + tab).classList.add("active");
+  const lab = document.querySelector("nav button.active .lab");
+  if (lab) $("topbarTitle").textContent = lab.textContent;
+  if (tab === "graph") loadGraph();
+  if (tab === "videos") loadVideos();
+  if (tab === "course") loadCourse();
+  if (tab === "exercise") loadExercises();
+  if (tab === "recommend") loadRecommend();
+  if (tab === "self") loadSelf();
+  if (tab === "insight") loadInsight();
+  if (tab === "weak") loadWeak();
+  if (tab === "tools") loadTools();
+}
+document.querySelectorAll("nav button").forEach(btn =>
+  btn.addEventListener("click", () => switchTab(btn.dataset.tab)));
+
+/* ---------- 健康检查 ---------- */
+async function checkHealth() {
+  const el = $("status");
+  try {
+    await api("/health");
+    el.classList.add("online"); el.classList.remove("offline");
+    $("statusText").textContent = "服务运行中";
+  } catch {
+    el.classList.add("offline"); el.classList.remove("online");
+    $("statusText").textContent = "服务未连接";
+  }
+}
+checkHealth(); setInterval(checkHealth, 15000);
+loadVideosCache();
+setRole("student");
+
+/* ---------- 视频课程 ---------- */
+function q(str) { return "'" + String(str).replace(/\\/g, "\\\\").replace(/'/g, "\\'") + "'"; }
+function normCh(ch) { return String(ch || "").replace(/第[0-9一二三四五六七八九十]+章/g, "").trim(); }
+function matchVideos(chapter) {
+  const n = normCh(chapter);
+  if (!n) return [];
+  return state.videosCache.filter(v => {
+    const vn = normCh(v.chapter);
+    return vn && (vn.includes(n) || n.includes(vn));
+  });
+}
+async function loadVideosCache() {
+  try { const d = await api("/v1/videos"); state.videosCache = d.videos || []; } catch (e) { /* 非关键，静默 */ }
+}
+async function loadVideos() {
+  const box = $("videoList");
+  box.innerHTML = '<span class="muted">加载中…</span>';
+  try {
+    const d = await api("/v1/videos");
+    state.videosCache = d.videos || [];
+    const chs = Object.keys(d.by_chapter || {});
+    if (!chs.length) {
+      box.innerHTML = '<div class="empty-tip">暂无视频课程。<br>可将教学视频放入知识库 <b>video</b> 目录，运行 <b>scripts/gen_video_manifest.py</b> 生成清单后重建索引。</div>';
+      return;
+    }
+    box.innerHTML = chs.map(ch =>
+      '<div style="margin-bottom:16px">' +
+      '<div style="font-size:13.5px;font-weight:700;color:var(--primary-dark);margin-bottom:8px;display:flex;align-items:center;gap:8px">' +
+      '<span style="width:6px;height:6px;border-radius:50%;background:var(--primary);display:inline-block"></span>' + esc(ch) +
+      '<span class="muted" style="font-weight:400">（' + d.by_chapter[ch].length + ' 个视频）</span></div>' +
+      '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px">' +
+      d.by_chapter[ch].map(v =>
+        '<div style="border:1px solid var(--border);border-radius:12px;padding:12px 14px;background:#fff;box-shadow:var(--shadow-sm);cursor:pointer;transition:all .18s" onclick="openVideo(' + q(esc(v.title)) + ',' + q(esc(v.video_url)) + ')">' +
+        '<div style="display:flex;align-items:center;gap:10px">' +
+        '<span style="width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;display:grid;place-items:center;font-size:15px;flex-shrink:0">▶</span>' +
+        '<div style="min-width:0"><div style="font-size:13.5px;font-weight:600;line-height:1.5">' + esc(v.title) + "</div>" +
+        '<div class="muted" style="font-size:11.5px;margin-top:2px">' + esc(v.video_url) +
+        (v.duration ? " · " + esc(v.duration) : "") + "</div></div></div>" +
+        (v.description ? '<div style="font-size:12px;color:#475569;margin-top:8px;line-height:1.7">' + esc(v.description) + "</div>" : "") +
+        "</div>").join("") + "</div></div>").join("");
+  } catch (e) {
+    box.innerHTML = '<span style="color:var(--bad)">视频加载失败：' + esc(e.message) + "</span>";
+  }
+}
+window.openVideo = function (title, url) {
+  $("videoModalTitle").textContent = title;
+  const p = $("videoPlayer");
+  p.src = url;
+  $("videoModal").style.display = "flex";
+  p.play().catch(function () {});
+};
+function closeVideo() {
+  const p = $("videoPlayer");
+  p.pause(); p.removeAttribute("src"); p.load();
+  $("videoModal").style.display = "none";
+}
+$("videoModalClose").addEventListener("click", closeVideo);
+$("videoModal").addEventListener("click", function (e) { if (e.target === this) closeVideo(); });
+$("videoRefreshBtn").addEventListener("click", loadVideos);
+
+/* ---------- 课程信息 ---------- */
+async function loadCourse() {
+  const box = $("courseContent");
+  box.innerHTML = '<span class="muted">加载中…</span>';
+  try {
+    const d = await api("/v1/course/meta");
+    const tb = d.textbook || {};
+    const refs = (d.references || []).map(r => "《" + esc(r.name) + "》" + (r.authors ? "（" + esc(r.authors) + "）" : "") + (r.publisher ? "，" + esc(r.publisher) + (r.year || "") : "")).join("<br>");
+    const chs = (d.chapters || []).map(c =>
+      '<tr><td style="white-space:nowrap">第' + esc(c.no) + "章 " + esc(c.name) + '</td><td>' + esc(c.hours) + "学时</td><td>" +
+      esc((c.topics || []).join("、")) + "</td><td>" + esc(c.knowledge_requirements || "") + "</td></tr>").join("");
+    const goals = (d.course_goals || []).map(g =>
+      '<div style="padding:8px 12px;background:#f8faff;border-radius:8px;margin-bottom:6px;font-size:13px;line-height:1.7"><b>目标' + esc(g.id) + "：</b>" + esc(g.description) + "</div>").join("");
+    box.innerHTML =
+      '<div class="stat-grid" style="margin-bottom:14px">' +
+      '<div class="stat"><div class="num">' + esc(d.course_name_cn) + '</div><div class="lab">' + esc(d.course_name_en) + " · " + esc(d.course_code) + "</div></div>" +
+      '<div class="stat"><div class="num">' + esc(d.instructor) + '</div><div class="lab">任课教师（课程负责人）</div></div>' +
+      '<div class="stat"><div class="num">' + esc(d.hours) + "/" + esc(d.credits) + '</div><div class="lab">学时 / 学分</div></div>' +
+      '<div class="stat"><div class="num">' + esc(d.course_nature) + '</div><div class="lab">课程性质 · ' + esc(d.major) + "</div></div></div>" +
+      '<div class="card" style="margin-bottom:14px"><h2>基本信息</h2>' +
+      '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:8px;font-size:13px;line-height:1.9">' +
+      "<div><b>开课单位：</b>" + esc(d.department) + "</div>" +
+      "<div><b>专业负责人：</b>" + esc(d.professional_leader) + "</div>" +
+      "<div><b>课程负责人：</b>" + esc(d.course_leader) + "</div>" +
+      "<div><b>制定时间：</b>" + esc(d.revised_at) + "</div>" +
+      "<div><b>学时分配：</b>授课" + esc(d.hours_breakdown && d.hours_breakdown.lecture) + "学时</div>" +
+      "<div><b>先修课程：</b>" + esc((d.prerequisites || []).join("、")) + "</div></div></div>" +
+      '<div class="card" style="margin-bottom:14px"><h2>教材与参考书</h2>' +
+      '<div style="font-size:13px;line-height:1.9"><b>选用教材：</b>《' + esc(tb.name) + "》，" + esc(tb.authors) + "，" + esc(tb.publisher) + (tb.year || "") + "，ISBN " + esc(tb.isbn) + "</div>" +
+      '<div style="font-size:13px;line-height:1.9;margin-top:8px"><b>主要参考书：</b><br>' + refs + "</div></div>" +
+      '<div class="card" style="margin-bottom:14px"><h2>考核方式</h2>' +
+      '<div style="font-size:13px;line-height:1.9"><b>成绩构成：</b>' + esc(d.assessment) + "</div>" +
+      '<div style="font-size:13px;line-height:1.9;margin-top:6px">' + esc(d.assessment_detail) + "</div></div>" +
+      '<div class="card" style="margin-bottom:14px"><h2>课程目标</h2>' + goals + "</div>" +
+      '<div class="card"><h2>教学大纲（十章）</h2>' +
+      '<table><thead><tr><th>章节</th><th>学时</th><th>教学内容</th><th>知识与能力要求</th></tr></thead><tbody>' + chs + "</tbody></table></div>";
+  } catch (e) {
+    box.innerHTML = '<span style="color:var(--bad)">课程信息加载失败：' + esc(e.message) + "</span>";
+  }
+}
+$("courseRefreshBtn").addEventListener("click", loadCourse);
+
+/* ---------- 对话 ---------- */
+function addMsg(role, html) {
+  const div = document.createElement("div");
+  div.className = "msg " + (role === "user" ? "user" : "bot");
+  div.innerHTML = html;
+  const box = $("messages");
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+  return div;
+}
+async function send() {
+  const input = $("chatInput");
+  const question = input.value.trim();
+  if (!question) return;
+  await ensureSession();
+  const btn = $("sendBtn"); btn.disabled = true;
+  addMsg("user", fmt(question));
+  input.value = "";
+  const botDiv = addMsg("bot", '<span class="muted">思考中…</span>');
+  try {
+    const resp = await fetch("/v1/chat/stream", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ session_id: state.sessionId, question })
+    });
+    if (!resp.ok || !resp.body) throw new Error("HTTP " + resp.status);
+    const reader = resp.body.getReader();
+    const dec = new TextDecoder("utf-8");
+    let buf = "", meta = null, answer = "";
+    const bodyEl = document.createElement("div");
+    bodyEl.className = "stream-body";
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buf += dec.decode(value, { stream: true });
+      const events = buf.split("\n\n");
+      buf = events.pop() || "";
+      for (const ev of events) {
+        const lines = ev.split("\n");
+        const type = (lines.find(l => l.startsWith("event:")) || "").slice(6).trim();
+        const dataLine = (lines.find(l => l.startsWith("data:")) || "").slice(5).trim();
+        if (!dataLine) continue;
+        const data = JSON.parse(dataLine);
+        if (type === "meta") { meta = data; }
+        else if (type === "delta") { answer += data.text; }
+        else if (type === "done") { /* 结束 */ }
+        else if (type === "error") { throw new Error(data.detail || "服务异常"); }
+      }
+      if (meta && !botDiv.querySelector(".stream-body")) {
+        botDiv.innerHTML = "";
+        botDiv.appendChild(bodyEl);
+        bodyEl.textContent = answer;
+      } else if (meta) {
+        bodyEl.textContent = answer;
+      }
+      $("messages").scrollTop = $("messages").scrollHeight;
+    }
+    if (!meta) throw new Error("未收到服务端响应");
+    state.sessionId = meta.session_id;
+    state.turns++;
+    renderBotMessage(botDiv, Object.assign(meta, { answer }), question);
+    updateSide();
+  } catch (e) {
+    botDiv.innerHTML = '<span style="color:var(--bad)">请求失败：' + esc(e.message) + "</span>";
+  } finally { btn.disabled = false; input.focus(); }
+}
+function renderBotMessage(container, r, question) {
+  const badges = [
+    r.knowledge_base_hit ? '<span class="badge ok">知识库命中 ' + r.best_score + "</span>"
+                         : '<span class="badge warn">未命中 · 学习引导</span>',
+    '<span class="badge plain">意图：' + esc(r.intent) + "</span>",
+    '<span class="badge plain">检索：' + esc(r.retrieval_mode) + "</span>",
+    '<span class="badge plain">生成：' + esc(r.generation_mode) + "</span>"
+  ].join("");
+  const sources = (r.sources || []).map(s => {
+    let actionBtn = "";
+    if (s.resource_url) {
+      if (s.resource_type === "video") {
+        actionBtn = ' <a href="' + esc(s.resource_url) + '" target="_blank" style="display:inline-block;margin-top:4px;padding:3px 10px;border-radius:14px;background:#dcfce7;color:#15803d;font-size:12px;text-decoration:none">▶ 播放视频</a>';
+      } else {
+        const typeLabel = {ppt: "PPT", pdf: "PDF", doc: "文档", exercise: "题库", syllabus: "大纲"}[s.resource_type] || "下载";
+        actionBtn = ' <a href="' + esc(s.resource_url) + '" download style="display:inline-block;margin-top:4px;padding:3px 10px;border-radius:14px;background:#eff6ff;color:#1d4ed8;font-size:12px;text-decoration:none">📥 下载' + typeLabel + "</a>";
+      }
+    } else if (s.video_url) {
+      actionBtn = ' <span class="badge ok" style="cursor:pointer" onclick="openVideo(' + q(esc(s.source)) + ',' + q(esc(s.video_url)) + ')">🎬 观看视频</span>';
+    }
+    return '<div class="src"><b>[' + esc(s.source) + "]</b> " + esc(s.chapter || "") +
+      (s.page ? " · 第" + esc(s.page) + "页" : "") + (s.score ? " · 相似度 " + s.score : "") +
+      actionBtn +
+      (s.text ? '<div style="margin-top:4px">' + esc(s.text) + (s.resource_url ? "" : "…") + "</div>" : "") +
+      "</div>";
+  }).join("");
+  let sourcesBlock = "";
+  if (r.intent === "course_info") {
+    sourcesBlock = '<div style="margin-top:8px"><span class="badge plain">📋 来源：课程教学大纲</span></div>';
+  } else if (r.intent === "resource") {
+    sourcesBlock = '<div style="margin-top:10px">' + sources + "</div>";
+  } else if (r.sources && r.sources.length) {
+    sourcesBlock = '<details style="margin-top:8px"><summary style="cursor:pointer;color:var(--muted);font-size:12px;user-select:none">📚 知识点来源（' + r.sources.length + '）· 点击展开</summary><div style="margin-top:6px">' + sources + "</div></details>";
+  }
+  const chapSrc = (r.sources && r.sources[0] && r.sources[0].chapter) || "";
+  const vids = matchVideos(chapSrc);
+  const vidCards = vids.length
+    ? '<div style="margin-top:8px;padding:10px 12px;background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;font-size:12.5px;line-height:1.8">🎬 <b>本章节配套视频课程</b>' +
+      vids.map(v => '<span style="display:inline-block;margin:4px 6px 0 0;padding:4px 10px;border-radius:16px;background:#ffedd5;color:#9a3412;cursor:pointer;font-size:12px" onclick="openVideo(' + q(esc(v.title)) + ',' + q(esc(v.video_url)) + ')">▶ ' + esc(v.title) + "</span>").join("") +
+      "</div>"
+    : "";
+  const trace = (r.trace || []).map(t =>
+    '<div class="trace-node">' + esc(t.node) +
+    (t.status && t.status !== "ok" ? ' <span style="color:var(--warn)">(' + esc(t.status) + ")</span>" : "") +
+    "</div>").join("");
+  const stars = '<div class="stars">本回答质量：<span class="star" data-v="1">★</span><span class="star" data-v="2">★</span><span class="star" data-v="3">★</span><span class="star" data-v="4">★</span><span class="star" data-v="5">★</span></div>';
+  const followup = r.followup_question
+    ? '<div class="followup" title="点击填入输入框">💬 ' + esc(r.followup_question) + "</div>" : "";
+  container.innerHTML =
+    fmt(r.answer) + '<div class="badges">' + badges + "</div>" + sourcesBlock + vidCards + followup + stars +
+    "<details><summary>流程轨迹</summary>" + trace + "</details>";
+  if (followup) container.querySelector(".followup").addEventListener("click", function () {
+    $("chatInput").value = this.textContent.replace(/^💬 /, "").trim();
+    $("chatInput").focus();
+  });
+  container.querySelectorAll(".star").forEach(st => st.addEventListener("click", function () {
+    const v = Number(this.dataset.v);
+    container.querySelectorAll(".star").forEach((s, i) => s.classList.toggle("on", i < v));
+    submitFeedback(question, v);
+  }));
+  // MathJax 公式兜底渲染（若模型输出了 LaTeX 公式）
+  if (window.MathJax && window.MathJax.typesetPromise) {
+    window.MathJax.typesetPromise([container]).catch(function () {});
+  }
+}
+async function submitFeedback(question, rating) {
+  try {
+    await api("/v1/feedback", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ session_id: state.sessionId, question, rating })
+    });
+    toast("感谢反馈！评分 " + rating + " 星已记录");
+  } catch (e) { toast("反馈提交失败：" + e.message); }
+}
+function updateSide() {
+  $("sidState").textContent = state.sessionId ? "进行中" : "未开始";
+  $("sidVal").textContent = state.sessionId || "—";
+  $("turnCount").textContent = state.turns;
+}
+$("sendBtn").addEventListener("click", send);
+$("chatInput").addEventListener("keydown", e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === "Enter") send();
+});
+$("newSessionBtn").addEventListener("click", async () => {
+  if (state.sessionId) { try { await api("/v1/sessions/" + state.sessionId, { method: "DELETE" }); } catch {} }
+  state.sessionId = null; state.turns = 0; updateSide();
+  $("messages").innerHTML = '<div class="welcome">新会话已开始，请输入你的问题。</div>';
+  toast("已开始新会话（自我评估与推荐将基于新会话数据）");
+});
+
+/* ---------- 知识图谱 ---------- */
+async function loadGraph() {
+  if (state.chapters.length) return;
+  try {
+    const d = await api("/v1/graph/overview");
+    state.chapters = d.chapters || [];
+    $("graphChain").innerHTML = state.chapters.map((c, i) =>
+      '<span class="g-node" data-i="' + i + '">' + (i + 1) + ". " + esc(c.name) + "</span>" +
+      (i < state.chapters.length - 1 ? '<span class="g-arrow">→</span>' : "")).join("");
+    $("graphChain").querySelectorAll(".g-node").forEach(n =>
+      n.addEventListener("click", () => showChapter(Number(n.dataset.i))));
+    showChapter(0);
+  } catch (e) { $("graphChain").innerHTML = '<span style="color:var(--bad)">图谱加载失败：' + esc(e.message) + "</span>"; }
+}
+function showChapter(i) {
+  const c = state.chapters[i];
+  if (!c) return;
+  $("graphChain").querySelectorAll(".g-node").forEach((n, j) => n.classList.toggle("active", j === i));
+  $("graphDetail").innerHTML =
+    '<div class="g-card"><div class="t">当前章节</div><div class="v">' + esc(c.name) + "</div></div>" +
+    '<div class="g-card"><div class="t">前置知识点</div><div class="v">' + (c.prerequisite ? esc(c.prerequisite) : "（第一章，无前置）") + "</div></div>" +
+    '<div class="g-card"><div class="t">后继章节</div><div class="v">' + (c.successor ? esc(c.successor) : "（最后一章）") + "</div></div>" +
+    '<div class="g-card"><div class="t">学习目标</div><div class="v">' + esc(c.objective) + "</div></div>";
+}
+async function graphSearch() {
+  const node = $("graphSearchInput").value.trim();
+  const box = $("graphSearchResult");
+  if (!node) { toast("请输入知识点"); return; }
+  box.textContent = "查询中…";
+  try {
+    const r = await api("/v1/graph?node=" + encodeURIComponent(node) + "&relation_type=prerequisite");
+    const r2 = await api("/v1/graph?node=" + encodeURIComponent(node) + "&relation_type=successor");
+    const r3 = await api("/v1/graph?node=" + encodeURIComponent(node) + "&relation_type=objective");
+    if (!r.matched_chapter) { box.innerHTML = "未匹配到课程章节，图谱数据目前覆盖十章教学内容。"; return; }
+    const f = x => x.related.length ? esc(x.related[0].name) : "—";
+    box.className = "";
+    box.innerHTML = '<div class="graph-detail">' +
+      '<div class="g-card"><div class="t">匹配章节</div><div class="v">' + esc(r.matched_chapter) + "</div></div>" +
+      '<div class="g-card"><div class="t">前置知识点</div><div class="v">' + f(r) + "</div></div>" +
+      '<div class="g-card"><div class="t">后继章节</div><div class="v">' + f(r2) + "</div></div>" +
+      '<div class="g-card"><div class="t">学习目标</div><div class="v">' + f(r3) + "</div></div></div>";
+  } catch (e) { box.innerHTML = '<span style="color:var(--bad)">查询失败：' + esc(e.message) + "</span>"; }
+}
+$("graphSearchBtn").addEventListener("click", graphSearch);
+$("graphSearchInput").addEventListener("keydown", e => { if (e.key === "Enter") graphSearch(); });
+
+/* ---------- 习题自测 ---------- */
+async function loadExercises() {
+  const box = $("exList");
+  box.innerHTML = '<span class="muted">抽题中…</span>';
+  try {
+    const d = await api("/v1/exercises?limit=5");
+    state.exercises = d.exercises || [];
+    if (!state.exercises.length) { box.innerHTML = '<div class="empty-tip">暂时没有可抽取的习题。<br>请确认知识库中已包含教材/课件或"题目：…参考答案：…"格式的题库资料。</div>'; return; }
+    box.innerHTML = state.exercises.map((ex, i) =>
+      '<div class="ex-card" id="exCard' + i + '">' +
+      '<div class="q">' + (i + 1) + ". " + esc(ex.question) + "</div>" +
+      '<div class="meta"><span class="tag' + (ex.generated ? " warn" : "") + '">' + (ex.generated ? "AI 生成" : "题库") +
+      '</span>来源：' + esc(ex.source || "—") +
+      (ex.chapter ? " · " + esc(ex.chapter) : "") + "</div>" +
+      '<div class="form-row" style="margin:8px 0"><textarea rows="3" placeholder="在此输入你的作答…" id="exAns' + i + '"></textarea></div>' +
+      '<button class="btn sm" onclick="submitExercise(' + i + ')">提交作答</button> ' +
+      '<button class="btn ghost sm" onclick="toggleAnswer(' + i + ')">查看参考答案</button>' +
+      '<div id="exResult' + i + '"></div></div>').join("");
+  } catch (e) { box.innerHTML = '<span style="color:var(--bad)">抽题失败：' + esc(e.message) + "</span>"; }
+}
+window.toggleAnswer = function (i) {
+  const ex = state.exercises[i];
+  const box = $("exResult" + i);
+  const existing = box.querySelector(".ref");
+  if (existing) { existing.remove(); return; }
+  box.insertAdjacentHTML("beforeend", '<div class="ref" style="margin-top:10px"><b>参考答案：</b>' + esc(ex.answer) + "</div>");
+};
+window.submitExercise = async function (i) {
+  const ex = state.exercises[i];
+  const answer = $("exAns" + i).value.trim();
+  if (!answer) { toast("请先输入作答内容"); return; }
+  const sid = await ensureSession();
+  const box = $("exResult" + i);
+  box.innerHTML = '<p class="muted">批阅中…</p>';
+  try {
+    const r = await api("/v1/homework/judge", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ session_id: sid, question_text: ex.question, student_answer: answer })
+    });
+    const pct = Math.round(r.score * 100);
+    const color = r.score >= 0.8 ? "var(--ok)" : r.score >= 0.5 ? "var(--warn)" : "var(--bad)";
+    const modeName = { exact: "精确匹配", keyword: "要点比对", llm: "诊断反馈（教师复核）", none: "空作答" }[r.mode] || r.mode;
+    box.innerHTML = '<div class="result-box">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center"><b>得分：' + pct +
+      ' 分</b><span class="badge plain">批阅方式：' + esc(modeName) + "</span></div>" +
+      '<div class="score-bar"><div style="width:' + pct + "%;background:" + color + '"></div></div>' +
+      '<div>' + fmt(r.feedback) + "</div>" +
+      (r.reference ? '<div class="ref"><b>参考答案：</b>' + esc(r.reference) + "</div>" : "") + "</div>";
+  } catch (e) { box.innerHTML = '<p style="color:var(--bad)">批阅失败：' + esc(e.message) + "</p>"; }
+};
+$("exRefreshBtn").addEventListener("click", loadExercises);
+
+/* ---------- 学习推荐 ---------- */
+async function loadRecommend() {
+  const box = $("recList");
+  box.innerHTML = '<span class="muted">加载中…</span>';
+  try {
+    const sid = await ensureSession();
+    const d = await api("/v1/recommend?session_id=" + encodeURIComponent(sid));
+    box.innerHTML = (d.recommendations || []).map(r => {
+      const tagCls = r.type === "习题订正" ? "warn" : r.type === "知识补强" ? "" : "ok";
+      const actName = { chat: "去提问", exercise: "去自测", graph: "看图谱" }[r.action] || "查看";
+      return '<div class="rec-card"><span class="tag ' + tagCls + '">' + esc(r.type) + "</span>" +
+        '<div class="q" style="margin-top:6px">' + esc(r.title) + "</div>" +
+        '<div class="reason">' + esc(r.reason) + "</div>" +
+        '<button class="btn sm" data-act="' + r.action + '" data-title="' + esc(r.title) + '">' + actName + "</button></div>";
+    }).join("");
+    box.querySelectorAll("button[data-act]").forEach(b => b.addEventListener("click", function () {
+      const act = this.dataset.act;
+      if (act === "chat") { $("chatInput").value = this.dataset.title; switchTab("chat"); $("chatInput").focus(); }
+      else if (act === "exercise") switchTab("exercise");
+      else switchTab("graph");
+    }));
+  } catch (e) { box.innerHTML = '<span style="color:var(--bad)">推荐加载失败：' + esc(e.message) + "</span>"; }
+}
+
+/* ---------- 自我评估 ---------- */
+async function loadSelf() {
+  try {
+    const sid = await ensureSession();
+    const d = await api("/v1/self-assessment?session_id=" + encodeURIComponent(sid));
+    $("selfCards").innerHTML = [
+      [d.total_questions, "提问次数"],
+      [d.hit_rate == null ? "—" : (d.hit_rate * 100).toFixed(0) + "%", "知识库命中率"],
+      [d.homework_count, "自测题数"],
+      [d.homework_avg_score == null ? "—" : Math.round(d.homework_avg_score * 100) + "分", "自测平均分"],
+    ].map(x => '<div class="stat"><div class="num">' + x[0] + '</div><div class="lab">' + x[1] + "</div></div>").join("");
+    $("selfMissed").innerHTML = d.missed_questions.length
+      ? d.missed_questions.map(m => '<div class="list-item"><span>' + esc(m.question) + "</span></div>").join("")
+      : "暂无数据（所有提问均命中知识库，继续保持！）";
+    $("selfWeak").innerHTML = d.weak_homework.length
+      ? d.weak_homework.map(w => '<div class="list-item"><span>' + esc(w.question_text) +
+        '</span><b style="color:var(--bad)">' + Math.round(w.score * 100) + "分</b></div>").join("")
+      : "暂无数据（自测成绩良好）";
+  } catch (e) { toast("自我评估加载失败：" + e.message); }
+}
+$("selfRefreshBtn").addEventListener("click", loadSelf);
+
+/* ---------- 教师：学情看板 / 薄弱点 ---------- */
+function hbars(container, rows, unit) {
+  const max = Math.max(...rows.map(r => r.v), 1);
+  container.innerHTML = rows.map(r =>
+    '<div class="hbar-row"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' +
+    esc(r.k) + '">' + esc(r.k) + '</span><div class="hbar"><div style="width:' +
+    Math.round(r.v / max * 100) + '%"></div></div><span style="text-align:right">' + r.v + (unit || "") + "</span></div>"
+  ).join("");
+}
+async function fetchInsight(days) {
+  return await api("/v1/insight?days=" + days);
+}
+async function loadInsight() {
+  try {
+    const d = await fetchInsight($("insightDays").value);
+    const fb = d.feedback || {};
+    $("statCards").innerHTML = [
+      [d.total_sessions, "会话数"], [d.total_questions, "提问数"],
+      [d.hit_rate == null ? "—" : (d.hit_rate * 100).toFixed(1) + "%", "知识库命中率"],
+      [fb.count || 0, "反馈数"], [fb.avg_rating == null ? "—" : fb.avg_rating.toFixed(2), "平均评分"]
+    ].map(x => '<div class="stat"><div class="num">' + x[0] + '</div><div class="lab">' + x[1] + "</div></div>").join("");
+    const daily = (d.daily_questions || []).map(x => ({ k: x.date, v: x.questions }));
+    daily.length ? hbars($("dailyChart"), daily, " 问") : $("dailyChart").textContent = "暂无数据";
+    const intents = (d.intent_distribution || []).map(x => ({ k: x.intent, v: x.c }));
+    intents.length ? hbars($("intentChart"), intents, " 次") : $("intentChart").textContent = "暂无数据";
+  } catch (e) { toast("学情加载失败：" + e.message); }
+}
+$("insightBtn").addEventListener("click", loadInsight);
+
+async function loadWeak() {
+  try {
+    const d = await fetchInsight($("weakDays").value);
+    $("weakTable").innerHTML = (d.weak_points || []).length
+      ? "<table><tr><th>题目来源</th><th>错误次数</th><th>平均得分</th><th>严重度</th></tr>" +
+        d.weak_points.map(w => {
+          const avg = w.avg_score == null ? "—" : w.avg_score.toFixed(2);
+          const sev = w.c >= 5 ? '<span class="tag warn">重点讲评</span>' : '<span class="tag">关注</span>';
+          return "<tr><td>" + esc(w.matched_source || "—") + "</td><td>" + w.c + "</td><td>" + avg + "</td><td>" + sev + "</td></tr>";
+        }).join("") + "</table>"
+      : "暂无数据（统计周期内无低于 0.6 分的作业记录）";
+    const intents = (d.intent_distribution || []).map(x => ({ k: x.intent, v: x.c }));
+    intents.length ? hbars($("weakIntent"), intents, " 次") : $("weakIntent").textContent = "暂无数据";
+  } catch (e) { toast("薄弱点加载失败：" + e.message); }
+}
+$("weakBtn").addEventListener("click", loadWeak);
+
+/* ---------- 教师：数据导出 ---------- */
+function bindExport(linkId, table) {
+  $(linkId).addEventListener("click", function () {
+    this.href = "/v1/export/" + table + "?days=" + $("exportDays").value;
+  });
+}
+bindExport("exportInteractions", "interactions");
+bindExport("exportHomework", "homework");
+bindExport("exportFeedback", "feedback");
+
+/* ---------- MCP 工具 ---------- */
+async function loadTools() {
+  try {
+    const d = await api("/v1/tools");
+    $("toolsList").innerHTML = (d.tools || []).map(t =>
+      '<div class="tool-card"><h3>' + esc(t.name) + "</h3><p>" + esc(t.description || "") + "</p>" +
+      "<pre>" + esc(JSON.stringify(t.inputSchema, null, 2)) + "</pre></div>"
+    ).join("") || '<span class="muted">无注册工具</span>';
+  } catch (e) { $("toolsList").innerHTML = '<span style="color:var(--bad)">加载失败：' + esc(e.message) + "</span>"; }
+}
+</script>
+</body>
+</html>
