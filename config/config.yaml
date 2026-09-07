@@ -1,0 +1,86 @@
+# ============================================================
+# 《机器人学导论》课程智能体 配置文件
+# 成都理工大学2025年度"AI研究基金"项目（2025AI068）
+# ============================================================
+
+server:
+  host: "0.0.0.0"
+  port: 8000
+  # 会话超时时间（分钟），超时自动结束会话
+  session_timeout_minutes: 30
+
+# 课程信息
+course:
+  name: "《机器人学导论》"
+  institution: "成都理工大学计算机与网络安全学院（示范性软件学院）"
+  # 知识图谱/目标图谱节点（可按课程实际建设情况扩展）
+  chapters:
+    - "绪论"
+    - "机器人本体结构"
+    - "机器人运动学"
+    - "机器人动力学"
+    - "机器人轨迹规划"
+    - "机器人控制系统"
+    - "机器人的编程与语言"
+    - "工业机器人"
+    - "操纵型机器人"
+    - "仿生机器人"
+
+# 知识库
+knowledge_base:
+  # 原始资料目录（教材/课件/题库/教学大纲等）
+  source_dir: "data/knowledge_base"
+  # 索引输出目录
+  index_dir: "data/index"
+  # 支持的文件扩展名
+  extensions: [".pdf", ".ppt", ".pptx", ".doc", ".docx"]
+  # 文本分块参数：块大小（字符）与块间重叠（字符）
+  chunk_size: 500
+  chunk_overlap: 60
+  # 大文件页数上限（0 表示不限制），用于控制构建耗时
+  pdf_max_pages: 0
+  # 扫描版PDF OCR：无文字层页面自动OCR识别（需安装 rapidocr-onnxruntime）
+  pdf_ocr: true
+  # OCR 结果缓存目录（同一PDF只需识别一次）
+  ocr_cache_dir: "data/cache"
+
+# 检索参数（初始设计值，需按测试集实测调优）
+retrieval:
+  top_k: 5                 # 候选片段数量
+  threshold: 0.72          # 知识库命中判定阈值 θ（向量/混合模式，余弦相似度语义）
+  threshold_keyword: 0.5   # 纯关键词（未配置Embedding）模式的命中阈值
+  # 混合检索权重：向量检索与关键词检索的得分占比
+  vector_weight: 0.6
+  keyword_weight: 0.4
+
+# 向量化与Embedding
+embedding:
+  # 后端类型：api（OpenAI兼容接口）/ local（本地sentence-transformers模型）/ none（仅关键词检索）
+  provider: "none"
+  # api 后端参数（OpenAI 兼容，例如阿里云 DashScope 兼容模式）
+  api_base_url: ""         # 例如 https://dashscope.aliyuncs.com/compatible-mode/v1
+  api_model: "text-embedding-v3"
+  # local 后端参数
+  local_model_name: "BAAI/bge-small-zh-v1.5"
+  dim: 512
+
+# 大模型
+llm:
+  # 后端类型：openai（OpenAI兼容对话接口）/ dummy（本地模拟，用于无密钥联调）
+  provider: "dummy"
+  api_base_url: ""         # 例如 https://dashscope.aliyuncs.com/compatible-mode/v1
+  api_model: "qwen3.8-27b"
+  temperature: 0.3         # 助教场景建议较低温度，保证回答稳定
+  max_tokens: 1024
+  timeout_seconds: 180
+  # 模型异常时重试次数（真实模型单次生成可能需 30-60s，重试会使等待翻倍，默认 0 不重试）
+  retry_times: 0
+
+# 学情数据库（SQLite）
+study_db:
+  path: "data/study.db"
+
+# 日志
+logging:
+  level: "INFO"
+  dir: "data/logs"

@@ -1,0 +1,150 @@
+{
+  "updated_at": "2026-09-05",
+  "total": 16,
+  "resources": [
+    {
+      "id": "res_001",
+      "title": "第一章 绪论（课件）",
+      "type": "ppt",
+      "chapter": "第一章 绪论",
+      "file": "第一章 绪论.pptx",
+      "url": "/resources/第一章 绪论.pptx",
+      "description": "课程课件"
+    },
+    {
+      "id": "res_002",
+      "title": "第七章 机器人的编程与语言（课件）",
+      "type": "ppt",
+      "chapter": "第七章 机器人的编程与语言",
+      "file": "第七章 机器人的编程与语言.ppt",
+      "url": "/resources/第七章 机器人的编程与语言.ppt",
+      "description": "课程课件"
+    },
+    {
+      "id": "res_003",
+      "title": "第三章 机器人运动学（课件）",
+      "type": "ppt",
+      "chapter": "第三章 机器人运动学",
+      "file": "第三章 机器人运动学.pptx",
+      "url": "/resources/第三章 机器人运动学.pptx",
+      "description": "课程课件"
+    },
+    {
+      "id": "res_004",
+      "title": "第九章 操纵型机器人（课件）",
+      "type": "ppt",
+      "chapter": "第九章 操纵型机器人",
+      "file": "第九章 操纵型机器人.pptx",
+      "url": "/resources/第九章 操纵型机器人.pptx",
+      "description": "课程课件"
+    },
+    {
+      "id": "res_005",
+      "title": "第二章 机器人本体结构（课件）",
+      "type": "ppt",
+      "chapter": "第二章 机器人本体结构",
+      "file": "第二章  机器人本体结构.pptx",
+      "url": "/resources/第二章  机器人本体结构.pptx",
+      "description": "课程课件"
+    },
+    {
+      "id": "res_006",
+      "title": "第五章 机器人轨迹规划（课件）",
+      "type": "ppt",
+      "chapter": "第五章 机器人轨迹规划",
+      "file": "第五章 机器人轨迹规划.pptx",
+      "url": "/resources/第五章 机器人轨迹规划.pptx",
+      "description": "课程课件"
+    },
+    {
+      "id": "res_007",
+      "title": "第八章 工业机器人（课件）",
+      "type": "ppt",
+      "chapter": "第八章 工业机器人",
+      "file": "第八章 工业机器人.pptx",
+      "url": "/resources/第八章 工业机器人.pptx",
+      "description": "课程课件"
+    },
+    {
+      "id": "res_008",
+      "title": "第六章 机器人控制系统（课件）",
+      "type": "ppt",
+      "chapter": "第六章 机器人控制系统",
+      "file": "第六章 机器人控制系统.pptx",
+      "url": "/resources/第六章 机器人控制系统.pptx",
+      "description": "课程课件"
+    },
+    {
+      "id": "res_009",
+      "title": "第十章 仿生机器人（课件）",
+      "type": "ppt",
+      "chapter": "第十章 仿生机器人",
+      "file": "第十章 仿生机器人.pptx",
+      "url": "/resources/第十章 仿生机器人.pptx",
+      "description": "课程课件"
+    },
+    {
+      "id": "res_010",
+      "title": "第四章 机器人动力学（课件）",
+      "type": "ppt",
+      "chapter": "第四章 机器人动力学",
+      "file": "第四章 机器人动力学.pptx",
+      "url": "/resources/第四章 机器人动力学.pptx",
+      "description": "课程课件"
+    },
+    {
+      "id": "res_011",
+      "title": "机器人技术基础 第3版【刘极峰，杨小兰】高等教育出版社  2019.09-14740590（教材）",
+      "type": "pdf",
+      "chapter": "",
+      "file": "机器人技术基础 第3版【刘极峰，杨小兰】高等教育出版社  2019.09-14740590.pdf",
+      "url": "/resources/机器人技术基础 第3版【刘极峰，杨小兰】高等教育出版社  2019.09-14740590.pdf",
+      "description": "课程教材，刘极峰、杨小兰，高等教育出版社2019"
+    },
+    {
+      "id": "res_012",
+      "title": "机器人学导论-题库（题库）",
+      "type": "exercise",
+      "chapter": "",
+      "file": "机器人学导论-题库.doc",
+      "url": "/resources/机器人学导论-题库.doc",
+      "description": "课程题库（含参考答案）"
+    },
+    {
+      "id": "res_013",
+      "title": "机器人学导论 课程教学大纲（教学大纲）",
+      "type": "syllabus",
+      "chapter": "",
+      "file": "机器人学导论 课程教学大纲.doc",
+      "url": "/resources/机器人学导论 课程教学大纲.doc",
+      "description": "课程教学大纲"
+    },
+    {
+      "id": "res_014",
+      "title": "第六章 机器人控制系统 教学视频（1）",
+      "type": "video",
+      "chapter": "第六章 机器人控制系统",
+      "file": "video/ch06_1.mp4",
+      "url": "/videos/ch06_1.mp4",
+      "description": "教学视频"
+    },
+    {
+      "id": "res_015",
+      "title": "第六章 机器人控制系统 教学视频（2）",
+      "type": "video",
+      "chapter": "第六章 机器人控制系统",
+      "file": "video/ch06_2.mp4",
+      "url": "/videos/ch06_2.mp4",
+      "description": "教学视频"
+    },
+    {
+      "id": "res_016",
+      "title": "第九章 操纵型机器人 教学视频（1）",
+      "type": "video",
+      "chapter": "第九章 操纵型机器人",
+      "file": "video/ch09_1.mp4",
+      "url": "/videos/ch09_1.mp4",
+      "description": "教学视频"
+    }
+  ]
+}

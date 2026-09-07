@@ -1,0 +1,59 @@
+# 环境与密钥
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+*.egg-info/
+dist/
+build/
+
+# IDE / 编辑器
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# 运行数据与构建产物（可重新生成）
+data/index/
+data/study.db
+data/study.db-journal
+data/agent.db
+data/agent.db-journal
+data/logs/
+
+# 模型文件（大体积，用户自行放置）
+data/models/
+app/digital_human/
+app/static/digital_human/
+app/static/img/
+
+# 知识库源文件（体积大，含教材PDF超GitHub单文件限制；用户自行放置）
+data/knowledge_base/
+
+# 截图与验证产物
+data/screenshots/
+data/_*.py
+data/_*.png
+_patch_*.py
+_*.py
+!scripts/*.py
+
+# 文档与演示文件
+*.pptx
+*.docx
+*.pdf
+
+# 临时文件
+*.tmp
+*.log

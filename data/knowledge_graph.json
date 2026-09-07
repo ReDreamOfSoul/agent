@@ -1,0 +1,1294 @@
+{
+  "nodes": [
+    {
+      "id": "ch1",
+      "name": "第一章 绪论",
+      "type": "chapter",
+      "chapter": 1,
+      "desc": "机器人学概述，掌握机器人定义、发展、分类与应用",
+      "symbolSize": 50,
+      "itemStyle": {
+        "color": "#6366f1"
+      }
+    },
+    {
+      "id": "ch1_s1",
+      "name": "机器人定义与特征",
+      "type": "section",
+      "chapter": 1,
+      "desc": "机器人的三要素：感知、决策、执行",
+      "symbolSize": 32,
+      "itemStyle": {
+        "color": "#6366f1"
+      }
+    },
+    {
+      "id": "ch1_s2",
+      "name": "发展简史",
+      "type": "section",
+      "chapter": 1,
+      "desc": "从古代自动机到现代智能机器人",
+      "symbolSize": 32,
+      "itemStyle": {
+        "color": "#6366f1"
+      }
+    },
+    {
+      "id": "ch1_s3",
+      "name": "机器人分类",
+      "type": "section",
+      "chapter": 1,
+      "desc": "按结构形式、坐标形式、应用领域分类",
+      "symbolSize": 32,
+      "itemStyle": {
+        "color": "#6366f1"
+      }
+    },
+    {
+      "id": "ch1_s4",
+      "name": "研究领域与相关学科",
+      "type": "section",
+      "chapter": 1,
+      "desc": "机械、电子、控制、计算机、人工智能交叉",
+      "symbolSize": 32,
+      "itemStyle": {
+        "color": "#6366f1"
+      }
+    },
+    {
+      "id": "ch1_c1",
+      "name": "三自由度",
+      "type": "concept",
+      "chapter": 1,
+      "desc": "机器人的基本运动能力",
+      "symbolSize": 20,
+      "itemStyle": {
+        "color": "#6366f1"
+      }
+    },
+    {
+      "id": "ch1_c2",
+      "name": "工业机器人",
+      "type": "concept",
+      "chapter": 1,
+      "desc": "面向工业生产的机器人",
+      "symbolSize": 20,
+      "itemStyle": {
+        "color": "#6366f1"
+      }
+    },
+    {
+      "id": "ch2",
+      "name": "第二章 本体结构",
+      "type": "chapter",
+      "chapter": 2,
+      "desc": "机器人机械结构：机身、手臂、手腕、手部",
+      "symbolSize": 50,
+      "itemStyle": {
+        "color": "#8b5cf6"
+      }
+    },
+    {
+      "id": "ch2_s1",
+      "name": "机身与臂部结构",
+      "type": "section",
+      "chapter": 2,
+      "desc": "支撑与大臂小臂的结构设计",
+      "symbolSize": 32,
+      "itemStyle": {
+        "color": "#8b5cf6"
+      }
+    },
+    {
+      "id": "ch2_s2",
+      "name": "腕部结构",
+      "type": "section",
+      "chapter": 2,
+      "desc": "手腕的俯仰、偏航、翻转自由度",
+      "symbolSize": 32,
+      "itemStyle": {
+        "color": "#8b5cf6"
+      }
+    },
+    {
+      "id": "ch2_s3",
+      "name": "手部结构",
+      "type": "section",
+      "chapter": 2,
+      "desc": "夹爪、吸盘、多指灵巧手",
+      "symbolSize": 32,
+      "itemStyle": {
+        "color": "#8b5cf6"
+      }
+    },
+    {
+      "id": "ch2_s4",
+      "name": "驱动方式",
+      "type": "section",
+      "chapter": 2,
+      "desc": "液压、气动、电机驱动",
+      "symbolSize": 32,
+      "itemStyle": {
+        "color": "#8b5cf6"
+      }
+    },
+    {
+      "id": "ch2_s5",
+      "name": "坐标形式",
+      "type": "section",
+      "chapter": 2,
+      "desc": "直角坐标、圆柱坐标、球坐标、关节坐标",
+      "symbolSize": 32,
+      "itemStyle": {
+        "color": "#8b5cf6"
+      }
+    },
+    {
+      "id": "ch2_c1",
+      "name": "自由度",
+      "type": "concept",
+      "chapter": 2,
+      "desc": "描述机器人运动能力的核心参数",
+      "symbolSize": 20,
+      "itemStyle": {
+        "color": "#8b5cf6"
+      }
+    },
+    {
+      "id": "ch2_c2",
+      "name": "工作空间",
+      "type": "concept",
+      "chapter": 2,
+      "desc": "机器人末端可达的空间范围",
+      "symbolSize": 20,
+      "itemStyle": {
+        "color": "#8b5cf6"
+      }
+    },
+    {
+      "id": "ch3",
+      "name": "第三章 运动学",
+      "type": "chapter",
+      "chapter": 3,
+      "desc": "机器人运动学：正运动学与逆运动学",
+      "symbolSize": 50,
+      "itemStyle": {
+        "color": "#3b82f6"
+      }
+    },
+    {
+      "id": "ch3_s1",
+      "name": "齐次坐标与位姿",
+      "type": "section",
+      "chapter": 3,
+      "desc": "用4x4齐次变换矩阵表示位置和姿态",
+      "symbolSize": 32,
+      "itemStyle": {
+        "color": "#3b82f6"
+      }
+    },
+    {
+      "id": "ch3_s2",
+      "name": "DH参数法",
+      "type": "section",
+      "chapter": 3,
+      "desc": "Denavit-Hartenberg参数建立连杆坐标系",
+      "symbolSize": 32,
+      "itemStyle": {
+        "color": "#3b82f6"
+      }
+    },
+    {
+      "id": "ch3_s3",
+      "name": "正运动学",
+      "type": "section",
+      "chapter": 3,
+      "desc": "已知关节角求末端位姿：T=A1*A2*...*An",
+      "symbolSize": 32,
+      "itemStyle": {
+        "color": "#3b82f6"
+      }
+    },
+    {
+      "id": "ch3_s4",
+      "name": "逆运动学",
+      "type": "section",
+      "chapter": 3,
+      "desc": "已知末端位姿求关节角：解析法/数值法",
+      "symbolSize": 32,
+      "itemStyle": {
+        "color": "#3b82f6"
+      }
+    },
+    {
+      "id": "ch3_s5",
+      "name": "雅可比矩阵",
+      "type": "section",
+      "chapter": 3,
+      "desc": "关节速度与末端速度的映射：v=J*q_dot",
+      "symbolSize": 32,
+      "itemStyle": {
+        "color": "#3b82f6"
+      }
+    },
+    {
+      "id": "ch3_c1",
+      "name": "齐次变换",
+      "type": "concept",
+      "chapter": 3,
+      "desc": "旋转+平移的4x4矩阵表示",
+      "symbolSize": 20,
+      "itemStyle": {
+        "color": "#3b82f6"
+      }
+    },
+    {
+      "id": "ch3_c2",
+      "name": "连杆参数",
+      "type": "concept",
+      "chapter": 3,
+      "desc": "a_i, alpha_i, d_i, theta_i",
+      "symbolSize": 20,
+      "itemStyle": {
+        "color": "#3b82f6"
+      }
+    },
+    {
+      "id": "ch3_c3",
+      "name": "奇异位形",
+      "type": "concept",
+      "chapter": 3,
+      "desc": "雅可比矩阵秩亏的位姿",
+      "symbolSize": 20,
+      "itemStyle": {
+        "color": "#3b82f6"
+      }
+    },
+    {
+      "id": "ch4",
+      "name": "第四章 动力学",
+      "type": "chapter",
+      "chapter": 4,
+      "desc": "机器人动力学：力与运动的关系",
+      "symbolSize": 50,
+      "itemStyle": {
+        "color": "#06b6d4"
+      }
+    },
+    {
+      "id": "ch4_s1",
+      "name": "雅可比与静力学",
+      "type": "section",
+      "chapter": 4,
+      "desc": "关节力矩与末端力的映射：F=J^T*tau",
+      "symbolSize": 32,
+      "itemStyle": {
+        "color": "#06b6d4"
+      }
+    },
+    {
+      "id": "ch4_s2",
+      "name": "拉格朗日动力学",
+      "type": "section",
+      "chapter": 4,
+      "desc": "基于能量的动力学方程：M(q)q_ddot+C(q,q_dot)+G=tau",
+      "symbolSize": 32,
+      "itemStyle": {
+        "color": "#06b6d4"
+      }
+    },
+    {
+      "id": "ch4_s3",
+      "name": "牛顿-欧拉法",
+      "type": "section",
+      "chapter": 4,
+      "desc": "递推动力学：正向速度加速度+反向力力矩",
+      "symbolSize": 32,
+      "itemStyle": {
+        "color": "#06b6d4"
+      }
+    },
+    {
+      "id": "ch4_s4",
+      "name": "动力学参数辨识",
+      "type": "section",
+      "chapter": 4,
+      "desc": "质量、质心、惯性张量的实验辨识",
+      "symbolSize": 32,
+      "itemStyle": {
+        "color": "#06b6d4"
+      }
+    },
+    {
+      "id": "ch4_c1",
+      "name": "惯性矩阵",
+      "type": "concept",
+      "chapter": 4,
+      "desc": "M(q)描述机器人的质量分布",
+      "symbolSize": 20,
+      "itemStyle": {
+        "color": "#06b6d4"
+      }
+    },
+    {
+      "id": "ch4_c2",
+      "name": "科氏力/离心力",
+      "type": "concept",
+      "chapter": 4,
+      "desc": "C(q,q_dot)速度相关项",
+      "symbolSize": 20,
+      "itemStyle": {
+        "color": "#06b6d4"
+      }
+    },
+    {
+      "id": "ch4_c3",
+      "name": "重力项",
+      "type": "concept",
+      "chapter": 4,
+      "desc": "G(q)重力补偿",
+      "symbolSize": 20,
+      "itemStyle": {
+        "color": "#06b6d4"
+      }
+    },
+    {
+      "id": "ch5",
+      "name": "第五章 轨迹规划",
+      "type": "chapter",
+      "chapter": 5,
+      "desc": "从起点到终点的运动轨迹生成",
+      "symbolSize": 50,
+      "itemStyle": {
+        "color": "#10b981"
+      }
+    },
+    {
+      "id": "ch5_s1",
+      "name": "轨迹规划概述",
+      "type": "section",
+      "chapter": 5,
+      "desc": "关节空间 vs 直角坐标空间规划",
+      "symbolSize": 32,
+      "itemStyle": {
+        "color": "#10b981"
+      }
+    },
+    {
+      "id": "ch5_s2",
+      "name": "关节空间规划",
+      "type": "section",
+      "chapter": 5,
+      "desc": "三次多项式、五次多项式插值",
+      "symbolSize": 32,
+      "itemStyle": {
+        "color": "#10b981"
+      }
+    },
+    {
+      "id": "ch5_s3",
+      "name": "直角坐标空间规划",
+      "type": "section",
+      "chapter": 5,
+      "desc": "直线插补、圆弧插补",
+      "symbolSize": 32,
+      "itemStyle": {
+        "color": "#10b981"
+      }
+    },
+    {
+      "id": "ch5_s4",
+      "name": "插补方式与轨迹控制",
+      "type": "section",
+      "chapter": 5,
+      "desc": "PTP/CP控制，轨迹跟踪",
+      "symbolSize": 32,
+      "itemStyle": {
+        "color": "#10b981"
+      }
+    },
+    {
+      "id": "ch5_c1",
+      "name": "三次多项式",
+      "type": "concept",
+      "chapter": 5,
+      "desc": "满足位置速度约束的最低次插值",
+      "symbolSize": 20,
+      "itemStyle": {
+        "color": "#10b981"
+      }
+    },
+    {
+      "id": "ch5_c2",
+      "name": "抛物线过渡",
+      "type": "concept",
+      "chapter": 5,
+      "desc": "梯形速度曲线的线性段+抛物线过渡",
+      "symbolSize": 20,
+      "itemStyle": {
+        "color": "#10b981"
+      }
+    },
+    {
+      "id": "ch6",
+      "name": "第六章 控制系统",
+      "type": "chapter",
+      "chapter": 6,
+      "desc": "机器人控制系统结构与控制策略",
+      "symbolSize": 50,
+      "itemStyle": {
+        "color": "#f59e0b"
+      }
+    },
+    {
+      "id": "ch6_s1",
+      "name": "控制体系结构",
+      "type": "section",
+      "chapter": 6,
+      "desc": "分层控制：组织级→协调级→执行级",
+      "symbolSize": 32,
+      "itemStyle": {
+        "color": "#f59e0b"
+      }
+    },
+    {
+      "id": "ch6_s2",
+      "name": "位置控制",
+      "type": "section",
+      "chapter": 6,
+      "desc": "PID位置伺服控制",
+      "symbolSize": 32,
+      "itemStyle": {
+        "color": "#f59e0b"
+      }
+    },
+    {
+      "id": "ch6_s3",
+      "name": "速度与力控制",
+      "type": "section",
+      "chapter": 6,
+      "desc": "速度环、力/位混合控制、阻抗控制",
+      "symbolSize": 32,
+      "itemStyle": {
+        "color": "#f59e0b"
+      }
+    },
+    {
+      "id": "ch6_s4",
+      "name": "计算机控制系统",
+      "type": "section",
+      "chapter": 6,
+      "desc": "多轴运动控制卡、实时系统",
+      "symbolSize": 32,
+      "itemStyle": {
+        "color": "#f59e0b"
+      }
+    },
+    {
+      "id": "ch6_c1",
+      "name": "PID控制",
+      "type": "concept",
+      "chapter": 6,
+      "desc": "比例-积分-微分控制",
+      "symbolSize": 20,
+      "itemStyle": {
+        "color": "#f59e0b"
+      }
+    },
+    {
+      "id": "ch6_c2",
+      "name": "力位混合控制",
+      "type": "concept",
+      "chapter": 6,
+      "desc": "某些方向力控、某些方向位控",
+      "symbolSize": 20,
+      "itemStyle": {
+        "color": "#f59e0b"
+      }
+    },
+    {
+      "id": "ch7",
+      "name": "第七章 编程与语言",
+      "type": "chapter",
+      "chapter": 7,
+      "desc": "机器人编程语言与编程方式",
+      "symbolSize": 50,
+      "itemStyle": {
+        "color": "#ef4444"
+      }
+    },
+    {
+      "id": "ch7_s1",
+      "name": "示教编程",
+      "type": "section",
+      "chapter": 7,
+      "desc": "手把手示教、示教盒编程",
+      "symbolSize": 32,
+      "itemStyle": {
+        "color": "#ef4444"
+      }
+    },
+    {
+      "id": "ch7_s2",
+      "name": "机器人编程语言",
+      "type": "section",
+      "chapter": 7,
+      "desc": "VAL、RAPID、KRL等专用语言",
+      "symbolSize": 32,
+      "itemStyle": {
+        "color": "#ef4444"
+      }
+    },
+    {
+      "id": "ch7_s3",
+      "name": "离线编程",
+      "type": "section",
+      "chapter": 7,
+      "desc": "CAD环境下的机器人程序生成与仿真",
+      "symbolSize": 32,
+      "itemStyle": {
+        "color": "#ef4444"
+      }
+    },
+    {
+      "id": "ch7_s4",
+      "name": "任务级编程",
+      "type": "section",
+      "chapter": 7,
+      "desc": "高层任务描述，自动生成运动序列",
+      "symbolSize": 32,
+      "itemStyle": {
+        "color": "#ef4444"
+      }
+    },
+    {
+      "id": "ch7_c1",
+      "name": "RAPID语言",
+      "type": "concept",
+      "chapter": 7,
+      "desc": "ABB机器人编程语言",
+      "symbolSize": 20,
+      "itemStyle": {
+        "color": "#ef4444"
+      }
+    },
+    {
+      "id": "ch7_c2",
+      "name": "离线仿真",
+      "type": "concept",
+      "chapter": 7,
+      "desc": "RobotStudio、RoboGuide等仿真环境",
+      "symbolSize": 20,
+      "itemStyle": {
+        "color": "#ef4444"
+      }
+    },
+    {
+      "id": "ch8",
+      "name": "第八章 工业机器人",
+      "type": "chapter",
+      "chapter": 8,
+      "desc": "工业机器人典型应用",
+      "symbolSize": 50,
+      "itemStyle": {
+        "color": "#ec4899"
+      }
+    },
+    {
+      "id": "ch8_s1",
+      "name": "焊接机器人",
+      "type": "section",
+      "chapter": 8,
+      "desc": "弧焊、点焊机器人工作站",
+      "symbolSize": 32,
+      "itemStyle": {
+        "color": "#ec4899"
+      }
+    },
+    {
+      "id": "ch8_s2",
+      "name": "装配机器人",
+      "type": "section",
+      "chapter": 8,
+      "desc": "精密装配、力控装配",
+      "symbolSize": 32,
+      "itemStyle": {
+        "color": "#ec4899"
+      }
+    },
+    {
+      "id": "ch8_s3",
+      "name": "搬运与码垛",
+      "type": "section",
+      "chapter": 8,
+      "desc": "物料搬运、码垛拆垛",
+      "symbolSize": 32,
+      "itemStyle": {
+        "color": "#ec4899"
+      }
+    },
+    {
+      "id": "ch8_s4",
+      "name": "喷涂机器人",
+      "type": "section",
+      "chapter": 8,
+      "desc": "防爆喷涂、轨迹优化",
+      "symbolSize": 32,
+      "itemStyle": {
+        "color": "#ec4899"
+      }
+    },
+    {
+      "id": "ch8_c1",
+      "name": "焊接工作站",
+      "type": "concept",
+      "chapter": 8,
+      "desc": "机器人+变位机+焊接电源的集成",
+      "symbolSize": 20,
+      "itemStyle": {
+        "color": "#ec4899"
+      }
+    },
+    {
+      "id": "ch8_c2",
+      "name": "柔性夹具",
+      "type": "concept",
+      "chapter": 8,
+      "desc": "可重构工装夹具",
+      "symbolSize": 20,
+      "itemStyle": {
+        "color": "#ec4899"
+      }
+    },
+    {
+      "id": "ch9",
+      "name": "第九章 操纵型机器人",
+      "type": "chapter",
+      "chapter": 9,
+      "desc": "遥操作与主从机器人",
+      "symbolSize": 50,
+      "itemStyle": {
+        "color": "#14b8a6"
+      }
+    },
+    {
+      "id": "ch9_s1",
+      "name": "遥操作概述",
+      "type": "section",
+      "chapter": 9,
+      "desc": "人在回路的远程操作系统",
+      "symbolSize": 32,
+      "itemStyle": {
+        "color": "#14b8a6"
+      }
+    },
+    {
+      "id": "ch9_s2",
+      "name": "主从控制结构",
+      "type": "section",
+      "chapter": 9,
+      "desc": "主手→从手的位置/力映射",
+      "symbolSize": 32,
+      "itemStyle": {
+        "color": "#14b8a6"
+      }
+    },
+    {
+      "id": "ch9_s3",
+      "name": "力反馈技术",
+      "type": "section",
+      "chapter": 9,
+      "desc": "触觉/力觉反馈，临场感",
+      "symbolSize": 32,
+      "itemStyle": {
+        "color": "#14b8a6"
+      }
+    },
+    {
+      "id": "ch9_s4",
+      "name": "典型应用",
+      "type": "section",
+      "chapter": 9,
+      "desc": "医疗手术、核工业、深海、空间机器人",
+      "symbolSize": 32,
+      "itemStyle": {
+        "color": "#14b8a6"
+      }
+    },
+    {
+      "id": "ch9_c1",
+      "name": "主从映射",
+      "type": "concept",
+      "chapter": 9,
+      "desc": "位置映射+力反馈映射",
+      "symbolSize": 20,
+      "itemStyle": {
+        "color": "#14b8a6"
+      }
+    },
+    {
+      "id": "ch9_c2",
+      "name": "时延控制",
+      "type": "concept",
+      "chapter": 9,
+      "desc": "通信时延下的稳定性控制",
+      "symbolSize": 20,
+      "itemStyle": {
+        "color": "#14b8a6"
+      }
+    },
+    {
+      "id": "ch10",
+      "name": "第十章 仿生机器人",
+      "type": "chapter",
+      "chapter": 10,
+      "desc": "模仿生物的机器人系统",
+      "symbolSize": 50,
+      "itemStyle": {
+        "color": "#a855f7"
+      }
+    },
+    {
+      "id": "ch10_s1",
+      "name": "仿生学概述",
+      "type": "section",
+      "chapter": 10,
+      "desc": "从生物机理到工程实现",
+      "symbolSize": 32,
+      "itemStyle": {
+        "color": "#a855f7"
+      }
+    },
+    {
+      "id": "ch10_s2",
+      "name": "仿人机器人",
+      "type": "section",
+      "chapter": 10,
+      "desc": "双足行走、人形操作、ASIMO/Atlas",
+      "symbolSize": 32,
+      "itemStyle": {
+        "color": "#a855f7"
+      }
+    },
+    {
+      "id": "ch10_s3",
+      "name": "仿生机构",
+      "type": "section",
+      "chapter": 10,
+      "desc": "仿生手、仿生眼、仿生皮肤",
+      "symbolSize": 32,
+      "itemStyle": {
+        "color": "#a855f7"
+      }
+    },
+    {
+      "id": "ch10_s4",
+      "name": "仿生控制",
+      "type": "section",
+      "chapter": 10,
+      "desc": "中枢模式发生器(CPG)、反射控制",
+      "symbolSize": 32,
+      "itemStyle": {
+        "color": "#a855f7"
+      }
+    },
+    {
+      "id": "ch10_c1",
+      "name": "双足步行",
+      "type": "concept",
+      "chapter": 10,
+      "desc": "ZMP判据与步态规划",
+      "symbolSize": 20,
+      "itemStyle": {
+        "color": "#a855f7"
+      }
+    },
+    {
+      "id": "ch10_c2",
+      "name": "CPG控制",
+      "type": "concept",
+      "chapter": 10,
+      "desc": "生物节律的非线性振荡器模型",
+      "symbolSize": 20,
+      "itemStyle": {
+        "color": "#a855f7"
+      }
+    }
+  ],
+  "links": [
+    {
+      "source": "ch1",
+      "target": "ch1_s1",
+      "type": "contains"
+    },
+    {
+      "source": "ch1",
+      "target": "ch1_s2",
+      "type": "contains"
+    },
+    {
+      "source": "ch1",
+      "target": "ch1_s3",
+      "type": "contains"
+    },
+    {
+      "source": "ch1",
+      "target": "ch1_s4",
+      "type": "contains"
+    },
+    {
+      "source": "ch1_s1",
+      "target": "ch1_c1",
+      "type": "related"
+    },
+    {
+      "source": "ch1_s3",
+      "target": "ch1_c2",
+      "type": "related"
+    },
+    {
+      "source": "ch2",
+      "target": "ch2_s1",
+      "type": "contains"
+    },
+    {
+      "source": "ch2",
+      "target": "ch2_s2",
+      "type": "contains"
+    },
+    {
+      "source": "ch2",
+      "target": "ch2_s3",
+      "type": "contains"
+    },
+    {
+      "source": "ch2",
+      "target": "ch2_s4",
+      "type": "contains"
+    },
+    {
+      "source": "ch2",
+      "target": "ch2_s5",
+      "type": "contains"
+    },
+    {
+      "source": "ch2_s5",
+      "target": "ch2_c1",
+      "type": "related"
+    },
+    {
+      "source": "ch2_s1",
+      "target": "ch2_c2",
+      "type": "related"
+    },
+    {
+      "source": "ch1_c1",
+      "target": "ch2_c1",
+      "type": "prerequisite"
+    },
+    {
+      "source": "ch3",
+      "target": "ch3_s1",
+      "type": "contains"
+    },
+    {
+      "source": "ch3",
+      "target": "ch3_s2",
+      "type": "contains"
+    },
+    {
+      "source": "ch3",
+      "target": "ch3_s3",
+      "type": "contains"
+    },
+    {
+      "source": "ch3",
+      "target": "ch3_s4",
+      "type": "contains"
+    },
+    {
+      "source": "ch3",
+      "target": "ch3_s5",
+      "type": "contains"
+    },
+    {
+      "source": "ch3_s1",
+      "target": "ch3_c1",
+      "type": "related"
+    },
+    {
+      "source": "ch3_s2",
+      "target": "ch3_c2",
+      "type": "related"
+    },
+    {
+      "source": "ch3_s5",
+      "target": "ch3_c3",
+      "type": "related"
+    },
+    {
+      "source": "ch2_c1",
+      "target": "ch3_s1",
+      "type": "prerequisite"
+    },
+    {
+      "source": "ch3_s1",
+      "target": "ch3_s2",
+      "type": "prerequisite"
+    },
+    {
+      "source": "ch3_s2",
+      "target": "ch3_s3",
+      "type": "prerequisite"
+    },
+    {
+      "source": "ch3_s3",
+      "target": "ch3_s4",
+      "type": "prerequisite"
+    },
+    {
+      "source": "ch3_s3",
+      "target": "ch3_s5",
+      "type": "prerequisite"
+    },
+    {
+      "source": "ch4",
+      "target": "ch4_s1",
+      "type": "contains"
+    },
+    {
+      "source": "ch4",
+      "target": "ch4_s2",
+      "type": "contains"
+    },
+    {
+      "source": "ch4",
+      "target": "ch4_s3",
+      "type": "contains"
+    },
+    {
+      "source": "ch4",
+      "target": "ch4_s4",
+      "type": "contains"
+    },
+    {
+      "source": "ch4_s2",
+      "target": "ch4_c1",
+      "type": "related"
+    },
+    {
+      "source": "ch4_s2",
+      "target": "ch4_c2",
+      "type": "related"
+    },
+    {
+      "source": "ch4_s2",
+      "target": "ch4_c3",
+      "type": "related"
+    },
+    {
+      "source": "ch3_s5",
+      "target": "ch4_s1",
+      "type": "prerequisite"
+    },
+    {
+      "source": "ch4_s1",
+      "target": "ch4_s2",
+      "type": "prerequisite"
+    },
+    {
+      "source": "ch4_s2",
+      "target": "ch4_s3",
+      "type": "related"
+    },
+    {
+      "source": "ch4_s2",
+      "target": "ch4_s4",
+      "type": "applies"
+    },
+    {
+      "source": "ch5",
+      "target": "ch5_s1",
+      "type": "contains"
+    },
+    {
+      "source": "ch5",
+      "target": "ch5_s2",
+      "type": "contains"
+    },
+    {
+      "source": "ch5",
+      "target": "ch5_s3",
+      "type": "contains"
+    },
+    {
+      "source": "ch5",
+      "target": "ch5_s4",
+      "type": "contains"
+    },
+    {
+      "source": "ch5_s2",
+      "target": "ch5_c1",
+      "type": "related"
+    },
+    {
+      "source": "ch5_s2",
+      "target": "ch5_c2",
+      "type": "related"
+    },
+    {
+      "source": "ch3_s4",
+      "target": "ch5_s1",
+      "type": "prerequisite"
+    },
+    {
+      "source": "ch4_s2",
+      "target": "ch5_s2",
+      "type": "prerequisite"
+    },
+    {
+      "source": "ch5_s1",
+      "target": "ch5_s2",
+      "type": "prerequisite"
+    },
+    {
+      "source": "ch5_s1",
+      "target": "ch5_s3",
+      "type": "prerequisite"
+    },
+    {
+      "source": "ch6",
+      "target": "ch6_s1",
+      "type": "contains"
+    },
+    {
+      "source": "ch6",
+      "target": "ch6_s2",
+      "type": "contains"
+    },
+    {
+      "source": "ch6",
+      "target": "ch6_s3",
+      "type": "contains"
+    },
+    {
+      "source": "ch6",
+      "target": "ch6_s4",
+      "type": "contains"
+    },
+    {
+      "source": "ch6_s2",
+      "target": "ch6_c1",
+      "type": "related"
+    },
+    {
+      "source": "ch6_s3",
+      "target": "ch6_c2",
+      "type": "related"
+    },
+    {
+      "source": "ch5_s4",
+      "target": "ch6_s1",
+      "type": "prerequisite"
+    },
+    {
+      "source": "ch6_s1",
+      "target": "ch6_s2",
+      "type": "prerequisite"
+    },
+    {
+      "source": "ch6_s2",
+      "target": "ch6_s3",
+      "type": "prerequisite"
+    },
+    {
+      "source": "ch7",
+      "target": "ch7_s1",
+      "type": "contains"
+    },
+    {
+      "source": "ch7",
+      "target": "ch7_s2",
+      "type": "contains"
+    },
+    {
+      "source": "ch7",
+      "target": "ch7_s3",
+      "type": "contains"
+    },
+    {
+      "source": "ch7",
+      "target": "ch7_s4",
+      "type": "contains"
+    },
+    {
+      "source": "ch7_s2",
+      "target": "ch7_c1",
+      "type": "related"
+    },
+    {
+      "source": "ch7_s3",
+      "target": "ch7_c2",
+      "type": "related"
+    },
+    {
+      "source": "ch6_s4",
+      "target": "ch7_s1",
+      "type": "prerequisite"
+    },
+    {
+      "source": "ch7_s1",
+      "target": "ch7_s2",
+      "type": "prerequisite"
+    },
+    {
+      "source": "ch7_s2",
+      "target": "ch7_s3",
+      "type": "prerequisite"
+    },
+    {
+      "source": "ch8",
+      "target": "ch8_s1",
+      "type": "contains"
+    },
+    {
+      "source": "ch8",
+      "target": "ch8_s2",
+      "type": "contains"
+    },
+    {
+      "source": "ch8",
+      "target": "ch8_s3",
+      "type": "contains"
+    },
+    {
+      "source": "ch8",
+      "target": "ch8_s4",
+      "type": "contains"
+    },
+    {
+      "source": "ch8_s1",
+      "target": "ch8_c1",
+      "type": "related"
+    },
+    {
+      "source": "ch8_s1",
+      "target": "ch8_c2",
+      "type": "related"
+    },
+    {
+      "source": "ch7_s3",
+      "target": "ch8_s1",
+      "type": "applies"
+    },
+    {
+      "source": "ch6_s3",
+      "target": "ch8_s2",
+      "type": "applies"
+    },
+    {
+      "source": "ch9",
+      "target": "ch9_s1",
+      "type": "contains"
+    },
+    {
+      "source": "ch9",
+      "target": "ch9_s2",
+      "type": "contains"
+    },
+    {
+      "source": "ch9",
+      "target": "ch9_s3",
+      "type": "contains"
+    },
+    {
+      "source": "ch9",
+      "target": "ch9_s4",
+      "type": "contains"
+    },
+    {
+      "source": "ch9_s2",
+      "target": "ch9_c1",
+      "type": "related"
+    },
+    {
+      "source": "ch9_s2",
+      "target": "ch9_c2",
+      "type": "related"
+    },
+    {
+      "source": "ch6_s3",
+      "target": "ch9_s2",
+      "type": "prerequisite"
+    },
+    {
+      "source": "ch9_s2",
+      "target": "ch9_s3",
+      "type": "prerequisite"
+    },
+    {
+      "source": "ch10",
+      "target": "ch10_s1",
+      "type": "contains"
+    },
+    {
+      "source": "ch10",
+      "target": "ch10_s2",
+      "type": "contains"
+    },
+    {
+      "source": "ch10",
+      "target": "ch10_s3",
+      "type": "contains"
+    },
+    {
+      "source": "ch10",
+      "target": "ch10_s4",
+      "type": "contains"
+    },
+    {
+      "source": "ch10_s2",
+      "target": "ch10_c1",
+      "type": "related"
+    },
+    {
+      "source": "ch10_s4",
+      "target": "ch10_c2",
+      "type": "related"
+    },
+    {
+      "source": "ch4_s2",
+      "target": "ch10_s2",
+      "type": "prerequisite"
+    },
+    {
+      "source": "ch5_s2",
+      "target": "ch10_s2",
+      "type": "prerequisite"
+    },
+    {
+      "source": "ch3_s5",
+      "target": "ch4_s1",
+      "type": "related"
+    },
+    {
+      "source": "ch5_s4",
+      "target": "ch6_s2",
+      "type": "related"
+    },
+    {
+      "source": "ch2_s4",
+      "target": "ch6_s4",
+      "type": "related"
+    },
+    {
+      "source": "ch1_s4",
+      "target": "ch10_s1",
+      "type": "related"
+    }
+  ],
+  "meta": {
+    "total_nodes": 74,
+    "total_links": 94
+  }
+}

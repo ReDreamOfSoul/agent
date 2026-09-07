@@ -1,0 +1,2114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>《机器人学导论》课程智能体</title>
+<style>
+:root {
+  --bg: #eef2f9; --card: #ffffff; --primary: #4f6ef7; --primary-dark: #3b4fd8;
+  --primary-2: #7c5cf0; --text: #1c2434; --muted: #7b8496; --border: #e6eaf3;
+  --ok: #16a34a; --warn: #d97706; --bad: #e11d48; --accent: #0891b2;
+  --sidebar-bg: linear-gradient(180deg, #101a33 0%, #0b1224 100%);
+  --shadow-sm: 0 1px 2px rgba(16,24,40,.06), 0 1px 3px rgba(16,24,40,.05);
+  --shadow-md: 0 6px 18px rgba(16,24,40,.08), 0 2px 6px rgba(16,24,40,.04);
+  --shadow-lg: 0 14px 34px rgba(16,24,40,.16), 0 4px 10px rgba(16,24,40,.06);
+  --radius: 14px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  font-family: "Segoe UI", "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+  background: var(--bg); color: var(--text); min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+.layout { display: flex; min-height: 100vh; }
+
+/* ---------- 侧边栏 ---------- */
+.sidebar {
+  width: 238px; flex-shrink: 0; background: var(--sidebar-bg); color: #cbd5e1;
+  display: flex; flex-direction: column; padding: 20px 14px; gap: 14px;
+  position: sticky; top: 0; height: 100vh;
+}
+.brand { display: flex; align-items: center; gap: 11px; padding: 2px 8px 14px; border-bottom: 1px solid rgba(255,255,255,.08); }
+.brand-logo { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; font-size: 22px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-2)); box-shadow: 0 6px 16px rgba(79,110,247,.45); }
+.brand-title { color: #fff; font-size: 15px; font-weight: 700; letter-spacing: .5px; }
+.brand-sub { font-size: 11px; color: #8b97b3; margin-top: 2px; }
+.role-switch { display: flex; background: rgba(255,255,255,.08); border-radius: 10px; padding: 3px; gap: 3px; }
+.role-switch button { flex: 1; border: none; background: none; color: #a5b0c8; padding: 8px 4px; border-radius: 8px;
+  cursor: pointer; font-size: 13px; font-family: inherit; transition: all .18s; }
+.role-switch button.active { background: linear-gradient(135deg, var(--primary), var(--primary-2)); color: #fff;
+  font-weight: 600; box-shadow: 0 4px 12px rgba(79,110,247,.4); }
+nav { display: flex; flex-direction: column; gap: 3px; overflow-y: auto; }
+nav button { display: flex; align-items: center; gap: 10px; border: none; background: none; padding: 10px 12px;
+  font-size: 13.5px; color: #a5b0c8; cursor: pointer; border-radius: 10px; white-space: nowrap;
+  font-family: inherit; text-align: left; transition: all .15s; border-left: 3px solid transparent; }
+nav button .ico { font-size: 15px; width: 20px; text-align: center; }
+nav button:hover { background: rgba(255,255,255,.06); color: #e2e8f0; }
+nav button.active { background: linear-gradient(90deg, rgba(79,110,247,.30), rgba(124,92,240,.14));
+  color: #fff; font-weight: 600; border-left-color: #8ea0ff; }
+.side-footer { margin-top: auto; display: flex; flex-direction: column; gap: 10px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,.08); }
+.status { display: flex; align-items: center; gap: 7px; font-size: 12px; background: rgba(255,255,255,.07);
+  padding: 7px 12px; border-radius: 9px; color: #cbd5e1; }
+.status .dot { width: 8px; height: 8px; border-radius: 50%; background: #9ca3af; flex-shrink: 0; }
+.status.online .dot { background: #4ade80; box-shadow: 0 0 8px #4ade80; animation: pulseDot 2s infinite; }
+.status.offline .dot { background: #f87171; }
+.foot-note { font-size: 10.5px; color: #6b7691; line-height: 1.7; padding: 0 6px; }
+
+/* ---------- 主内容区 ---------- */
+.content { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.topbar { background: rgba(255,255,255,.88); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border);
+  padding: 15px 30px; display: flex; align-items: baseline; gap: 14px; position: sticky; top: 0; z-index: 20; }
+.topbar-title { font-size: 18px; font-weight: 700; color: var(--text); }
+.topbar-sub { font-size: 12px; color: var(--muted); }
+
+main { flex: 1; padding: 24px 30px; max-width: 1180px; width: 100%; margin: 0 auto; }
+.panel { display: none; }
+.panel.active { display: block; animation: fadeUp .3s ease; }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px;
+  box-shadow: var(--shadow-sm); }
+.card + .card { margin-top: 16px; }
+.card h2 { font-size: 15px; margin-bottom: 14px; color: var(--text); font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.card h2::before { content: ""; width: 4px; height: 15px; border-radius: 2px;
+  background: linear-gradient(180deg, var(--primary), var(--primary-2)); }
+.muted { color: var(--muted); font-size: 12px; }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes pulseDot { 0%,100% { opacity: 1; } 50% { opacity: .45; } }
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: #c8d0e0; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #a9b4c8; }
+@media (max-width: 920px) {
+  .layout { flex-direction: column; }
+  .sidebar { width: 100%; height: auto; position: static; gap: 10px; }
+  nav { flex-direction: row; overflow-x: auto; }
+  nav button { border-left: none; border-bottom: 3px solid transparent; }
+  nav button.active { border-bottom-color: #8ea0ff; border-left-color: transparent; }
+  .side-footer { margin-top: 4px; }
+}
+
+/* ---------- 对话 ---------- */
+.chat-layout { display: grid; grid-template-columns: 1fr 300px; gap: 14px; }
+@media (max-width: 860px) { .chat-layout { grid-template-columns: 1fr; } }
+.chat-box { display: flex; flex-direction: column; height: calc(100vh - 240px); min-height: 460px; }
+#messages { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 14px; background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; }
+.msg { max-width: 86%; padding: 10px 14px; border-radius: 12px; font-size: 14px; line-height: 1.7; word-break: break-word; }
+.msg.user { align-self: flex-end; background: var(--primary); color: #fff; border-bottom-right-radius: 3px; }
+.msg.bot { align-self: flex-start; background: var(--card); border: 1px solid var(--border); border-bottom-left-radius: 3px; }
+.msg .badges { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 5px; }
+.badge { font-size: 11px; padding: 2px 8px; border-radius: 10px; background: #eef2ff; color: #4338ca; }
+.badge.ok { background: #dcfce7; color: #15803d; }
+.badge.warn { background: #fef3c7; color: #b45309; }
+.badge.plain { background: #f1f5f9; color: #475569; }
+.msg details { margin-top: 8px; font-size: 12px; }
+.msg summary { cursor: pointer; color: var(--muted); }
+.msg .trace-node { padding: 2px 0; color: #475569; }
+.msg .src { margin-top: 6px; padding: 8px 10px; background: #f8fafc; border-left: 3px solid var(--accent); border-radius: 4px; font-size: 12px; color: #475569; }
+.msg .src b { color: var(--accent); }
+.followup { margin-top: 10px; padding: 8px 12px; border: 1px dashed var(--primary); border-radius: 8px; background: #eff6ff; color: var(--primary-dark); font-size: 13px; cursor: pointer; }
+.followup:hover { background: #dbeafe; }
+.stars { margin-top: 8px; display: flex; align-items: center; gap: 4px; font-size: 13px; color: var(--muted); }
+.stars .star { cursor: pointer; font-size: 17px; color: #cbd5e1; transition: color .15s; }
+.stars .star.on { color: #f59e0b; }
+.input-row { display: flex; gap: 8px; margin-top: 10px; }
+.input-row textarea { flex: 1; resize: none; height: 64px; border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; font-size: 14px; font-family: inherit; outline: none; }
+.input-row textarea:focus { border-color: var(--primary); }
+.btn { border: none; border-radius: 10px; padding: 10px 22px; font-size: 14px; cursor: pointer; background: var(--primary); color: #fff; font-family: inherit; }
+.btn:hover { background: var(--primary-dark); }
+.btn:disabled { background: #93c5fd; cursor: not-allowed; }
+.btn.ghost { background: #fff; color: var(--primary); border: 1px solid var(--primary); }
+.btn.ghost:hover { background: #eff6ff; }
+.btn.sm { padding: 6px 14px; font-size: 13px; border-radius: 8px; }
+.side-info .kv { display: flex; justify-content: space-between; font-size: 13px; padding: 7px 0; border-bottom: 1px dashed var(--border); }
+.side-info .kv:last-of-type { border-bottom: none; }
+.side-info .kv b { color: var(--primary-dark); }
+.welcome { text-align: center; color: var(--muted); margin: auto; font-size: 13px; line-height: 2; }
+
+/* ---------- 表单 / 结果 ---------- */
+.form-row { margin-bottom: 12px; }
+.form-row label { display: block; font-size: 13px; margin-bottom: 5px; color: var(--muted); }
+.form-row textarea, .form-row input, .form-row select { width: 100%; border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px; font-size: 14px; font-family: inherit; outline: none; }
+.form-row textarea:focus, .form-row input:focus { border-color: var(--primary); }
+.score-bar { height: 14px; background: #e2e8f0; border-radius: 7px; overflow: hidden; margin: 10px 0 6px; }
+.score-bar > div { height: 100%; border-radius: 7px; transition: width .4s; }
+.result-box { margin-top: 14px; padding: 14px; background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; font-size: 14px; line-height: 1.8; }
+.result-box .ref { margin-top: 10px; padding: 10px; background: #fffbeb; border-left: 3px solid #f59e0b; font-size: 13px; color: #92400e; }
+
+/* ---------- 学情统计 ---------- */
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 14px; }
+.stat { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; text-align: center; }
+.stat .num { font-size: 26px; font-weight: 700; color: var(--primary); }
+.stat .lab { font-size: 12px; color: var(--muted); margin-top: 4px; }
+.hbar-row { display: grid; grid-template-columns: 130px 1fr 44px; align-items: center; gap: 8px; font-size: 12px; padding: 4px 0; }
+.hbar { height: 16px; background: #eef2ff; border-radius: 4px; overflow: hidden; }
+.hbar > div { height: 100%; background: var(--primary); opacity: .8; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); }
+th { color: var(--muted); font-weight: 500; font-size: 12px; }
+.toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; gap: 10px; flex-wrap: wrap; }
+.toolbar select { border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; font-family: inherit; }
+
+/* ---------- 知识图谱 ---------- */
+.graph-chain { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 10px 0 16px; }
+.g-node { padding: 8px 14px; border: 1.5px solid var(--border); border-radius: 20px; background: #fff; font-size: 13px; cursor: pointer; transition: all .15s; }
+.g-node:hover { border-color: var(--primary); color: var(--primary); }
+.g-node.active { background: var(--primary); border-color: var(--primary); color: #fff; font-weight: 600; }
+.g-arrow { color: var(--muted); font-size: 14px; }
+.graph-detail { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-top: 10px; }
+.graph-filter-btn { padding: 5px 12px; border: 1px solid var(--border); background: #fff; border-radius: 16px; font-size: 12px; cursor: pointer; color: #6b7280; transition: all .15s; font-family: inherit; }
+.graph-filter-btn:hover { border-color: var(--primary); color: var(--primary); }
+.graph-filter-btn.active { background: linear-gradient(135deg, var(--primary), var(--primary-2)); color: #fff; border-color: transparent; }
+.graph-detail-card { background: #f9fafb; border-radius: 10px; padding: 12px; border-left: 3px solid var(--primary); }
+.graph-neighbor-tag { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 11px; margin: 2px; cursor: pointer; transition: all .15s; }
+.graph-neighbor-tag:hover { transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,0,0,.1); }
+.g-card { border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; font-size: 13px; line-height: 1.7; background: #f8fafc; }
+.g-card .t { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+.g-card .v { font-weight: 600; color: var(--primary-dark); }
+
+/* ---------- 习题 / 推荐 ---------- */
+.ex-card, .rec-card { border: 1px solid var(--border); border-radius: 10px; padding: 14px; margin-bottom: 10px; }
+.ex-card .q, .rec-card .q { font-size: 14px; font-weight: 600; line-height: 1.7; }
+.ex-card .meta, .rec-card .meta { font-size: 12px; color: var(--muted); margin: 6px 0; }
+.tag { display: inline-block; font-size: 11px; padding: 2px 9px; border-radius: 10px; background: #ecfeff; color: #0e7490; margin-right: 6px; }
+.tag.warn { background: #fef3c7; color: #b45309; }
+.tag.ok { background: #dcfce7; color: #15803d; }
+.rec-card .reason { font-size: 13px; color: #475569; line-height: 1.8; margin: 8px 0; }
+.empty-tip { text-align: center; color: var(--muted); font-size: 13px; padding: 30px 10px; line-height: 2; }
+.list-item { padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; margin-bottom: 7px; background: #f8fafc; display: flex; justify-content: space-between; gap: 10px; }
+
+/* ---------- 工具 ---------- */
+.tool-card { border: 1px solid var(--border); border-radius: 10px; padding: 14px; margin-bottom: 10px; }
+.tool-card h3 { font-size: 14px; color: var(--primary-dark); font-family: Consolas, monospace; }
+.tool-card p { font-size: 13px; color: var(--muted); margin: 6px 0; }
+.tool-card pre { background: #f8fafc; padding: 10px; border-radius: 8px; font-size: 12px; overflow-x: auto; }
+
+/* ---------- 组件增强 ---------- */
+.btn { border: none; border-radius: 10px; padding: 10px 22px; font-size: 14px; cursor: pointer; font-family: inherit;
+  background: linear-gradient(135deg, var(--primary), var(--primary-2)); color: #fff; font-weight: 600;
+  box-shadow: 0 4px 14px rgba(79,110,247,.32); transition: all .18s; }
+.btn:hover { box-shadow: 0 6px 20px rgba(79,110,247,.42); transform: translateY(-1px); }
+.btn:active { transform: translateY(0); }
+.btn:disabled { background: #b9c4e8; box-shadow: none; cursor: not-allowed; transform: none; }
+.btn.ghost { background: #fff; color: var(--primary); border: 1px solid #c9d4f7; box-shadow: none; }
+.btn.ghost:hover { background: #f2f5ff; transform: none; }
+.btn.sm { padding: 7px 15px; font-size: 13px; border-radius: 9px; }
+
+.form-row textarea, .form-row input, .form-row select, .toolbar select {
+  border: 1px solid var(--border); border-radius: 10px; padding: 10px 13px; font-size: 14px;
+  font-family: inherit; outline: none; background: #fbfcfe; transition: all .15s; }
+.form-row textarea:focus, .form-row input:focus, .form-row select:focus, .toolbar select:focus {
+  border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79,110,247,.12); background: #fff; }
+.input-row textarea { border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; background: #fbfcfe; transition: all .15s; }
+.input-row textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79,110,247,.12); background: #fff; }
+
+.chat-box { height: calc(100vh - 205px); }
+#messages { background: linear-gradient(180deg, #f8faff, #f3f6fd); border: 1px solid var(--border);
+  border-radius: 12px; padding: 18px 46px; }
+.msg { max-width: 82%; padding: 11px 15px; border-radius: 14px; font-size: 14px; line-height: 1.75;
+  word-break: break-word; position: relative; animation: fadeUp .3s ease; box-shadow: var(--shadow-sm); }
+.msg.user { align-self: flex-end; background: linear-gradient(135deg, var(--primary), var(--primary-2));
+  color: #fff; border-bottom-right-radius: 4px; }
+.msg.bot { align-self: flex-start; background: #fff; border: 1px solid var(--border); border-bottom-left-radius: 4px; }
+.msg.bot::before, .msg.user::before { position: absolute; top: 0; font-size: 19px; }
+.msg.bot::before { content: "🤖"; left: -38px; }
+.msg.user::before { content: "🧑‍🎓"; right: -38px; }
+@media (max-width: 700px) {
+  #messages { padding: 14px 10px; }
+  .msg::before { display: none; }
+  .msg { max-width: 92%; }
+  .chat-box { height: 58vh; }
+}
+.msg .muted { animation: pulseDot 1.4s infinite; }
+.badge { font-size: 11px; padding: 3px 9px; border-radius: 20px; font-weight: 500; }
+.msg .src { background: #f6f8fd; border-left: 3px solid var(--accent); border-radius: 6px; }
+.followup { border: 1px dashed #8ea0ff; background: #f3f6ff; border-radius: 10px; transition: all .15s; }
+.followup:hover { background: #e8eeff; transform: translateX(2px); }
+.stars .star.on { color: #f59e0b; text-shadow: 0 0 8px rgba(245,158,11,.55); }
+.side-info .kv b { color: var(--primary); }
+.welcome { color: #9aa5bd; }
+
+.stat { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 16px;
+  text-align: left; box-shadow: var(--shadow-sm); transition: all .2s; position: relative; overflow: hidden; }
+.stat:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.stat .num { font-size: 27px; font-weight: 800; background: linear-gradient(135deg, var(--primary), var(--primary-2));
+  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.stat .lab { font-size: 12px; color: var(--muted); margin-top: 4px; }
+.stat::after { content: ""; position: absolute; right: -14px; top: -14px; width: 58px; height: 58px;
+  border-radius: 50%; background: linear-gradient(135deg, rgba(79,110,247,.12), rgba(124,92,240,.06)); }
+
+.hbar > div { background: linear-gradient(90deg, var(--primary), var(--primary-2)); border-radius: 4px; }
+table { border-radius: 10px; overflow: hidden; }
+th { background: #f8faff; }
+
+.g-node { padding: 9px 16px; border: 1.5px solid var(--border); border-radius: 22px; background: #fff;
+  font-size: 13px; font-weight: 500; box-shadow: var(--shadow-sm); transition: all .18s; }
+.g-node:hover { border-color: var(--primary); color: var(--primary); transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.g-node.active { background: linear-gradient(135deg, var(--primary), var(--primary-2)); border-color: transparent;
+  color: #fff; font-weight: 600; box-shadow: 0 6px 16px rgba(79,110,247,.4); }
+.g-card { background: linear-gradient(160deg, #f8faff, #f3f6fd); border: 1px solid var(--border); border-radius: 12px; }
+.g-card .v { color: var(--primary-dark); }
+
+.ex-card, .rec-card { border: 1px solid var(--border); border-radius: var(--radius); padding: 16px;
+  margin-bottom: 12px; background: #fff; box-shadow: var(--shadow-sm); transition: all .2s; }
+.ex-card:hover, .rec-card:hover { box-shadow: var(--shadow-md); border-color: #d6def5; }
+.tag { border-radius: 20px; font-weight: 500; }
+.list-item { background: #f8faff; border-radius: 10px; border: 1px solid #eef1f8; transition: background .15s; }
+.list-item:hover { background: #f0f4ff; }
+.result-box { background: linear-gradient(160deg, #f8faff, #f4f7fd); border-radius: 12px; }
+
+.tool-card { border-radius: 12px; transition: all .2s; }
+.tool-card:hover { box-shadow: var(--shadow-md); border-color: #d6def5; }
+.tool-card h3 { color: var(--primary-dark); }
+.tool-card pre { background: #0f172a; color: #c7d2fe; border-radius: 10px; }
+
+#toast { position: fixed; top: 22px; left: 50%; transform: translateX(-50%); background: rgba(17,24,39,.92);
+  backdrop-filter: blur(8px); color: #fff; padding: 11px 22px; border-radius: 12px; font-size: 13px;
+  display: none; z-index: 99; box-shadow: var(--shadow-lg); }
+
+/* ---------- 数字教师（1对1 AI 形象 + 语音，独立新增模块） ---------- */
+.dt-stage { display: flex; gap: 18px; align-items: stretch; }
+.dt-avatar-panel { width: 320px; flex-shrink: 0; border-radius: 16px; padding: 22px 14px 16px; text-align: center;
+  background: linear-gradient(170deg, #f4f8ff 0%, #faf6ff 55%, #effaf3 100%); border: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.dt-ava-wrap { position: relative; width: 100%; height: 430px; display: flex; align-items: flex-end; justify-content: center; overflow: hidden; }
+.dt-ava-aura { position: absolute; left: 50%; bottom: 0; transform: translateX(-50%); width: 80%; height: 60px; border-radius: 50%; background: radial-gradient(ellipse, rgba(120,150,255,.28) 0%, transparent 70%); filter: blur(6px); }
+.dt-ava-frame { position: relative; width: 100%; height: 100%; border: none; outline: none; background: transparent; display: block; }
+.dt-ava-img.dt-think { animation: dtThink 1.5s ease-in-out infinite; }
+.dt-ava-img.dt-nod   { animation: dtNod .8s ease-in-out; }
+.dt-ava-img.dt-wave  { animation: dtNod .6s ease-in-out 2; }
+.dt-ava-img.dt-idle  { animation: dtBob 4.5s ease-in-out infinite; }
+.dt-ava-img.dt-speaking { animation: dtSpeak 1.1s ease-in-out infinite; filter: drop-shadow(0 0 12px rgba(120,150,255,.55)) drop-shadow(0 8px 16px rgba(60,90,180,.22)); }
+.dt-ava-tip { position: absolute; top: 8px; right: 8px; font-size: 26px; filter: drop-shadow(0 2px 4px rgba(0,0,0,.28)); animation: dtTip 1.3s ease-in-out infinite; display: none; z-index: 2; }
+.dt-ava-tip.show { display: block; }
+@keyframes dtNod   { 0%, 100% { transform: rotate(0deg); } 30% { transform: rotate(-4deg); } 65% { transform: rotate(4deg); } }
+@keyframes dtThink { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+@keyframes dtBob   { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+@keyframes dtSpeak { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-4px) scale(1.015); } }
+@keyframes dtTip   { 0%, 100% { transform: translateY(0) rotate(-8deg); } 50% { transform: translateY(-6px) rotate(8deg); } }
+.dt-ava-name { font-size: 15px; font-weight: 700; color: var(--text); }
+.dt-ava-status { font-size: 12px; color: var(--muted); min-height: 16px; line-height: 1.5; }
+.dt-ava-actions { display: flex; gap: 6px; margin-top: 2px; }
+.dt-talk-panel { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.dt-box { height: 430px; overflow-y: auto; border: 1px solid var(--border); border-radius: 12px; padding: 14px; background: #f7f9fc; display: flex; flex-direction: column; gap: 12px; margin-bottom: 12px; }
+.dt-msg { display: flex; flex-direction: column; max-width: 88%; }
+.dt-msg.me { align-self: flex-end; align-items: flex-end; }
+.dt-msg.them { align-self: flex-start; align-items: flex-start; }
+.dt-who { font-size: 12px; color: var(--muted); margin-bottom: 3px; display: flex; align-items: center; gap: 6px; }
+.dt-who em { font-style: normal; color: var(--primary); font-weight: 600; }
+.dt-bubble { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 10px 14px; font-size: 13.5px; line-height: 1.75; color: var(--text); box-shadow: var(--shadow-sm); }
+.dt-msg.me .dt-bubble { background: var(--primary); color: #fff; border-color: transparent; }
+.dt-msg.them + .dt-msg.them { margin-top: 2px; }
+.dt-msg.me + .dt-msg.them, .dt-msg.them + .dt-msg.me { margin-top: 10px; }
+.btn.mic { flex-shrink: 0; font-size: 16px; min-width: 44px; }
+.btn.mic.listening { background: #e8453c; color: #fff; border-color: #e8453c; animation: dtMicPulse 1.1s ease-in-out infinite; }
+@keyframes dtMicPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(232,69,60,.45); } 50% { box-shadow: 0 0 0 9px rgba(232,69,60,0); } }
+</style>
+<script>
+window.MathJax = {
+  tex: { inlineMath: [["\\(", "\\)"]], displayMath: [["\\[", "\\]"]] },
+  svg: { fontCache: "global" },
+  startup: { typeset: false }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+<script src="/echarts.min.js"></script>
+</head>
+<body>
+
+<!-- 登录遮罩层 -->
+<div id="loginMask" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:16px;padding:32px;width:380px;max-width:90vw;box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+    <div style="text-align:center;margin-bottom:20px;">
+      <div style="font-size:40px;">🤖</div>
+      <div style="font-size:20px;font-weight:700;color:#1a1b1c;margin-top:8px;">机器人学导论智能体</div>
+      <div style="font-size:13px;color:#6b7280;margin-top:4px;">课程 AI 教学平台 · 请登录</div>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:16px;">
+      <button id="loginTabStudent" onclick="switchLoginTab('student')" style="flex:1;padding:8px;border:1px solid #e4e3dd;border-radius:8px;background:#eff6ff;color:#1d4ed8;font-weight:600;cursor:pointer;">🎓 学生登录</button>
+      <button id="loginTabTeacher" onclick="switchLoginTab('teacher')" style="flex:1;padding:8px;border:1px solid #e4e3dd;border-radius:8px;background:#fff;color:#6b7280;cursor:pointer;">👨‍🏫 教师登录</button>
+    </div>
+    <div style="margin-bottom:12px;">
+      <label style="font-size:12px;color:#6b7280;display:block;margin-bottom:4px;">用户名</label>
+      <input id="loginUsername" type="text" placeholder="请输入用户名" style="width:100%;padding:10px 12px;border:1px solid #e4e3dd;border-radius:8px;font-size:14px;box-sizing:border-box;">
+    </div>
+    <div style="margin-bottom:16px;">
+      <label style="font-size:12px;color:#6b7280;display:block;margin-bottom:4px;">密码</label>
+      <input id="loginPassword" type="password" placeholder="请输入密码" onkeydown="if(event.key==='Enter')doLogin()" style="width:100%;padding:10px 12px;border:1px solid #e4e3dd;border-radius:8px;font-size:14px;box-sizing:border-box;">
+    </div>
+    <div id="loginError" style="color:#dc2626;font-size:12px;margin-bottom:12px;display:none;"></div>
+    <button onclick="doLogin()" id="loginBtn" style="width:100%;padding:11px;background:linear-gradient(135deg,#3b82f6,#1d4ed8);color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;">登 录</button>
+    <div id="loginHint" style="margin-top:16px;padding:10px;background:#f9fafb;border-radius:8px;font-size:11px;color:#6b7280;line-height:1.8;">
+      <b>测试账号：</b><br>
+      学生：student01 / 123456（张三）<br>
+      学生：student02 / 123456（李四）<br>
+      教师：pengpeng / pengpeng123（彭鹏）
+    </div>
+  </div>
+</div>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-logo">🤖</div>
+      <div>
+        <div class="brand-title">机器人学导论</div>
+        <div class="brand-sub">课程 AI 智能体教学平台</div>
+      </div>
+    </div>
+    <div class="role-switch">
+      <button id="roleStudent" class="active">🎓 学生端</button>
+      <button id="roleTeacher">👨‍🏫 教师端</button>
+    </div>
+    <nav id="nav">
+      <button class="active" data-tab="chat" data-role="student"><span class="ico">💬</span><span class="lab">智能问答</span></button>
+      <button data-tab="graph" data-role="student"><span class="ico">🕸️</span><span class="lab">知识图谱</span></button>
+      <button data-tab="videos" data-role="student"><span class="ico">🎬</span><span class="lab">视频课程</span></button>
+      <button data-tab="course" data-role="student"><span class="ico">📋</span><span class="lab">课程信息</span></button>
+      <button data-tab="exercise" data-role="student"><span class="ico">📝</span><span class="lab">习题自测</span></button>
+      <button data-tab="recommend" data-role="student"><span class="ico">✨</span><span class="lab">学习推荐</span></button>
+      <button data-tab="self" data-role="student"><span class="ico">📈</span><span class="lab">自我评估</span></button>
+      <button data-tab="digital" data-role="student"><span class="ico">👨‍🏫</span><span class="lab">数字教师</span></button>
+      <button data-tab="insight" data-role="teacher"><span class="ico">📊</span><span class="lab">学情看板</span></button>
+      <button data-tab="weak" data-role="teacher"><span class="ico">⚠️</span><span class="lab">薄弱知识点</span></button>
+      <button data-tab="export" data-role="teacher"><span class="ico">📥</span><span class="lab">数据导出</span></button>
+      <button data-tab="assignments" data-role="teacher"><span class="ico">📚</span><span class="lab">作业管理</span></button>
+      <button data-tab="students" data-role="teacher"><span class="ico">👥</span><span class="lab">学生管理</span></button>
+      <button data-tab="tools" data-role="teacher"><span class="ico">🔧</span><span class="lab">MCP 工具</span></button>
+      <button data-tab="myhomework" data-role="student"><span class="ico">📋</span><span class="lab">我的作业</span></button>
+      <button data-tab="mystudy" data-role="student"><span class="ico">📊</span><span class="lab">学习记录</span></button>
+    </nav>
+    <div class="side-footer">
+      <div id="userBar" style="display:none;padding:10px;background:#f9fafb;border-radius:10px;margin-bottom:8px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div id="userAvatar" style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#3b82f6,#1d4ed8);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;">学</div>
+          <div style="flex:1;min-width:0;">
+            <div id="userName" style="font-size:13px;font-weight:600;color:#1a1b1c;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">未登录</div>
+            <div id="userRole" style="font-size:11px;color:#6b7280;">学生</div>
+          </div>
+          <button onclick="doLogout()" style="padding:4px 8px;border:1px solid #e4e3dd;border-radius:6px;background:#fff;color:#6b7280;font-size:11px;cursor:pointer;">退出</button>
+        </div>
+      </div>
+      <div class="status" id="status"><span class="dot"></span><span id="statusText">连接中…</span></div>
+      <div class="foot-note">成都理工大学 2025 年度 AI 研究基金<br>项目 2025AI068 · FastAPI + RAG</div>
+    </div>
+  </aside>
+  <div class="content">
+    <div class="topbar">
+      <span class="topbar-title" id="topbarTitle">智能问答</span>
+      <span class="topbar-sub">《机器人学导论》课程智能体 · 会话 30 分钟超时</span>
+    </div>
+<main>
+  <!-- ============ 学生：智能问答 ============ -->
+  <section class="panel active" id="panel-chat">
+    <div class="chat-layout">
+      <div class="card chat-box">
+        <div id="messages">
+          <div class="welcome">
+            你好！我是《机器人学导论》课程 AI 助教。<br>
+            可以向我提问课程知识（运动学、动力学、轨迹规划、控制系统……），<br>
+            也支持多轮追问；回答后可通过星星评分反馈质量。
+          </div>
+        </div>
+        <div class="input-row">
+          <textarea id="chatInput" placeholder="输入你的问题，Ctrl+Enter 发送…" maxlength="2000"></textarea>
+          <button class="btn" id="sendBtn">发送</button>
+        </div>
+      </div>
+      <div class="card side-info">
+        <h2>会话信息</h2>
+        <div class="kv"><span>会话状态</span><b id="sidState">未开始</b></div>
+        <div class="kv"><span>会话 ID</span><b id="sidVal">—</b></div>
+        <div class="kv"><span>累计轮次</span><b id="turnCount">0</b></div>
+        <div style="margin-top:14px"><button class="btn ghost" id="newSessionBtn" style="width:100%">+ 开始新会话</button></div>
+        <div style="margin-top:12px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+            <span style="font-size:12px;font-weight:600;color:#6b7280;">历史会话</span>
+            <button onclick="loadHistorySessions()" style="background:none;border:none;color:#3b82f6;font-size:11px;cursor:pointer;">刷新</button>
+          </div>
+          <div id="historyList" style="max-height:200px;overflow-y:auto;font-size:12px;"><span class="muted">加载中...</span></div>
+        </div>
+        <p class="muted" style="margin-top:12px; line-height:1.8">
+          学生端包含：智能问答、知识图谱可视化、习题自测、个性化学习推荐、自我评估五个模块，
+          学习数据将汇入教师端学情看板。
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 学生：知识图谱 ============ -->
+  <section class="panel" id="panel-graph">
+    <div class="card" style="padding:0;overflow:hidden;">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px 8px;flex-wrap:wrap;gap:10px;">
+        <div>
+          <h2 style="margin:0;font-size:18px;">🕸️ 课程知识图谱</h2>
+          <p class="muted" style="margin:4px 0 0;font-size:12px;">74个知识节点 · 94条关系边 · 拖拽节点探索 · 点击查看详情</p>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <button onclick="graphFilter('all')" class="graph-filter-btn active" data-f="all">全部</button>
+          <button onclick="graphFilter('chapter')" class="graph-filter-btn" data-f="chapter">章节</button>
+          <button onclick="graphFilter('section')" class="graph-filter-btn" data-f="section">小节</button>
+          <button onclick="graphFilter('concept')" class="graph-filter-btn" data-f="concept">知识点</button>
+        </div>
+      </div>
+      <div id="graphNetwork" style="width:100%;height:520px;"></div>
+      <div id="graphNodeDetail" style="padding:0 20px 16px;display:none;">
+        <div id="graphDetailContent"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2 style="font-size:16px;">🔍 知识点关系查询</h2>
+      <div class="input-row" style="margin-top:0">
+        <input id="graphSearchInput" placeholder="输入知识点，如：雅可比矩阵、DH参数、轨迹规划" style="flex:1;border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:14px;outline:none">
+        <button class="btn" id="graphSearchBtn">查询</button>
+      </div>
+      <div id="graphSearchResult" class="muted" style="margin-top:10px"></div>
+    </div>
+  </section>
+
+  <!-- ============ 学生：视频课程 ============ -->
+  <section class="panel" id="panel-videos">
+    <div class="card">
+      <div class="toolbar">
+        <h2 style="margin:0">视频课程学习（按章节）</h2>
+        <button class="btn sm" id="videoRefreshBtn">刷新</button>
+      </div>
+      <p class="muted">课程配套教学视频，点击卡片直接播放；智能问答命中相关章节知识点时也会自动推荐对应视频。</p>
+      <div id="videoList"><span class="muted">加载中…</span></div>
+    </div>
+  </section>
+
+  <!-- ============ 学生：课程信息 ============ -->
+  <section class="panel" id="panel-course">
+    <div class="card">
+      <div class="toolbar">
+        <h2 style="margin:0">课程信息（教学大纲）</h2>
+        <button class="btn sm" id="courseRefreshBtn">刷新</button>
+      </div>
+      <div id="courseContent"><span class="muted">加载中…</span></div>
+    </div>
+  </section>
+
+  <!-- ============ 学生：习题自测 ============ -->
+  <section class="panel" id="panel-exercise">
+    <div class="card">
+      <div class="toolbar">
+        <h2 style="margin:0">习题自测（题库随机抽题，自动批阅）</h2>
+        <button class="btn sm" id="exRefreshBtn">换一批题</button>
+      </div>
+      <div id="exList"><span class="muted">加载中…</span></div>
+    </div>
+  </section>
+
+  <!-- ============ 学生：学习推荐 ============ -->
+  <section class="panel" id="panel-recommend">
+    <div class="card">
+      <h2>个性化学习推荐</h2>
+      <p class="muted">基于你的问答命中情况与自测成绩生成：未命中问题 → 知识补强；低分习题 → 前置章节复习。</p>
+      <div id="recList" style="margin-top:12px"><span class="muted">加载中…</span></div>
+    </div>
+  </section>
+
+  <!-- ============ 学生：自我评估 ============ -->
+  <section class="panel" id="panel-self">
+    <div class="toolbar"><h2 style="font-size:15px;color:var(--primary-dark);margin:0">我的学习画像</h2>
+      <button class="btn sm" id="selfRefreshBtn">刷新</button></div>
+    <div class="stat-grid" id="selfCards"></div>
+    <div class="card"><h2>未命中知识库的问题（建议补强）</h2><div id="selfMissed" class="muted">暂无数据</div></div>
+    <div class="card"><h2>待订正习题（得分 &lt; 0.6）</h2><div id="selfWeak" class="muted">暂无数据</div></div>
+  </section>
+
+  <!-- ============ 教师：学情看板 ============ -->
+  <section class="panel" id="panel-insight">
+    <div class="toolbar">
+      <h2 style="font-size:15px;color:var(--primary-dark);margin:0">学情统计汇总（教师端）</h2>
+      <div>
+        <span class="muted">统计范围</span>
+        <select id="insightDays">
+          <option value="7">近 7 天</option>
+          <option value="30" selected>近 30 天</option>
+          <option value="90">近 90 天</option>
+          <option value="365">近一年</option>
+        </select>
+        <button class="btn sm" id="insightBtn">刷新</button>
+      </div>
+    </div>
+    <div class="stat-grid" id="statCards"></div>
+    <div class="card"><h2>每日提问量</h2><div id="dailyChart" class="muted">暂无数据</div></div>
+    <div class="card"><h2>意图分布</h2><div id="intentChart" class="muted">暂无数据</div></div>
+  </section>
+
+  <!-- ============ 教师：薄弱知识点 ============ -->
+  <section class="panel" id="panel-weak">
+    <div class="toolbar">
+      <h2 style="font-size:15px;color:var(--primary-dark);margin:0">薄弱知识点统计</h2>
+      <div>
+        <span class="muted">统计范围</span>
+        <select id="weakDays">
+          <option value="7">近 7 天</option>
+          <option value="30" selected>近 30 天</option>
+          <option value="90">近 90 天</option>
+          <option value="365">近一年</option>
+        </select>
+        <button class="btn sm" id="weakBtn">刷新</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>作业薄弱点（得分 &lt; 0.6 的题目来源聚类）</h2>
+      <div id="weakTable" class="muted">暂无数据</div>
+      <p class="muted" style="margin-top:10px;line-height:1.8">教学建议：错误次数多且平均分低的题目来源应在课堂上重点讲评；
+        可结合「知识图谱」定位该内容的前置章节，安排复习顺序。</p>
+    </div>
+    <div class="card"><h2>学生提问意图分布</h2><div id="weakIntent" class="muted">暂无数据</div></div>
+  </section>
+
+  <!-- ============ 教师：数据导出 ============ -->
+  <section class="panel" id="panel-export">
+    <div class="card">
+      <h2>教学数据导出（CSV，Excel 可直接打开）</h2>
+      <div class="form-row" style="margin-top:10px">
+        <label>导出数据范围</label>
+        <select id="exportDays">
+          <option value="7">近 7 天</option>
+          <option value="30" selected>近 30 天</option>
+          <option value="90">近 90 天</option>
+          <option value="365">近一年</option>
+        </select>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
+        <a class="btn" id="exportInteractions" download>导出交互记录</a>
+        <a class="btn" id="exportHomework" download>导出作业批阅</a>
+        <a class="btn" id="exportFeedback" download>导出学生反馈</a>
+      </div>
+      <p class="muted" style="margin-top:14px;line-height:1.8">
+        交互记录含每轮问答的意图、是否命中知识库、相似度、生成模式；作业批阅含题目、作答、得分与反馈；
+        学生反馈含评分与补充意见。
+      </p>
+    </div>
+  </section>
+
+  <!-- ============ 教师：MCP 工具 ============ -->
+  <section class="panel" id="panel-tools">
+    <div class="card">
+      <h2>统一 MCP 协议工具清单（tools/list）</h2>
+      <p class="muted" style="margin-bottom:12px">智能体能力以 MCP 工具形式注册，可供学校教学平台或其他智能体系统通过 JSON-RPC 2.0 调用（stdio 服务：<code>python -m app.mcp.server</code>）。</p>
+      <div id="toolsList"><span class="muted">加载中…</span></div>
+    </div>
+  </section>
+
+  <!-- ============ 教师：作业管理 ============ -->
+  <section class="panel" id="panel-assignments">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <h2 style="margin:0;">📚 作业管理</h2>
+        <button onclick="showAssignmentForm()" style="padding:8px 16px;background:#3b82f6;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;">+ 发布作业</button>
+      </div>
+      <div id="assignmentForm" style="display:none;background:#f9fafb;padding:16px;border-radius:10px;margin-bottom:16px;">
+        <h3 style="margin:0 0 12px 0;font-size:15px;">发布新作业</h3>
+        <div style="margin-bottom:10px;"><label style="font-size:12px;color:#6b7280;">作业标题</label>
+          <input id="newAsgTitle" type="text" style="width:100%;padding:8px;border:1px solid #e4e3dd;border-radius:6px;margin-top:4px;box-sizing:border-box;"></div>
+        <div style="margin-bottom:10px;"><label style="font-size:12px;color:#6b7280;">作业内容</label>
+          <textarea id="newAsgContent" rows="4" style="width:100%;padding:8px;border:1px solid #e4e3dd;border-radius:6px;margin-top:4px;box-sizing:border-box;"></textarea></div>
+        <div style="display:flex;gap:10px;">
+          <button onclick="createAssignment()" style="padding:8px 16px;background:#3b82f6;color:#fff;border:none;border-radius:6px;cursor:pointer;">发布</button>
+          <button onclick="$('assignmentForm').style.display='none'" style="padding:8px 16px;background:#e4e3dd;color:#374151;border:none;border-radius:6px;cursor:pointer;">取消</button>
+        </div>
+      </div>
+      <div id="teacherAssignmentsList"><span class="muted">加载中…</span></div>
+    </div>
+  </section>
+
+  <!-- ============ 教师：学生管理 ============ -->
+  <section class="panel" id="panel-students">
+    <div class="card">
+      <h2>👥 学生管理</h2>
+      <p class="muted" style="margin-bottom:16px;">查看选课学生列表及学习概况</p>
+      <div id="studentsList"><span class="muted">加载中…</span></div>
+    </div>
+  </section>
+
+  <!-- ============ 学生：我的作业 ============ -->
+  <section class="panel" id="panel-myhomework">
+    <div class="card">
+      <h2>📋 我的作业</h2>
+      <p class="muted" style="margin-bottom:16px;">查看课程作业、提交答案及教师批改结果</p>
+      <div id="myAssignmentsList"><span class="muted">加载中…</span></div>
+    </div>
+  </section>
+
+  <!-- ============ 学生：学习记录 ============ -->
+  <section class="panel" id="panel-mystudy">
+    <div class="card">
+      <h2>📊 学习记录</h2>
+      <p class="muted" style="margin-bottom:16px;">个人学情画像与学习数据统计</p>
+      <div id="studyProfile"><span class="muted">加载中…</span></div>
+      <div id="studyRanking" style="margin-top:20px;"></div>
+    </div>
+  </section>
+
+  <!-- ============ 学生：数字教师（1对1 AI 形象 + 语音，独立新增模块） ============ -->
+  <section class="panel" id="panel-digital">
+    <div class="card">
+      <div class="toolbar">
+        <h2 style="margin:0">👨‍🏫 数字教师</h2>
+        <button class="btn sm" id="dtVoiceToggle">🔊 语音已开启</button>
+      </div>
+      <p class="muted">课程数字教师「林老师」基于课程知识库一对一答疑，回答会自动语音朗读，也可以随时打字提问。</p>
+      <div class="dt-stage">
+        <!-- AI 形象区 -->
+        <div class="dt-avatar-panel">
+          <div class="dt-ava-wrap">
+            <div class="dt-ava-aura"></div>
+            <iframe id="dtAvaFrame" class="dt-ava-frame" src="/digital_human/live_embed.html" allow="autoplay" frameborder="0"></iframe>
+            <div class="dt-ava-tip" id="dtAvaTip">👋</div>
+          </div>
+          <div class="dt-ava-name">林老师 · 数字教师</div>
+          <div class="dt-ava-status" id="dtAvaStatus">已就绪，欢迎提问</div>
+          <div class="dt-ava-actions">
+            <button class="btn sm ghost" id="dtAvaHello">👋 打个招呼</button>
+            <button class="btn sm ghost" id="dtAvaStop">⏹ 停止说话</button>
+          </div>
+        </div>
+        <!-- 对话区 -->
+        <div class="dt-talk-panel">
+          <div id="dtMessages" class="dt-box">
+            <div class="welcome">我是《机器人学导论》课程的数字教师林老师。输入课程问题（如「什么是齐次变换矩阵？」「轨迹规划分为哪两类？」），我会结合知识库讲解，并用语音读给你听。</div>
+          </div>
+          <div class="input-row">
+            <textarea id="dtInput" placeholder="输入课程问题，或点击 🎤 直接语音提问…" maxlength="2000"></textarea>
+            <button class="btn mic" id="dtMicBtn" title="语音输入（说完自动发送）">🎤</button>
+            <button class="btn" id="dtSendBtn">提问</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+  </div>
+</div>
+<div id="toast"></div>
+<div id="videoModal" style="display:none;position:fixed;inset:0;z-index:98;background:rgba(10,16,34,.78);align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:16px;padding:16px;width:min(900px,94vw);box-shadow:0 20px 60px rgba(0,0,0,.4);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <div id="videoModalTitle" style="font-size:15px;font-weight:700;color:#1c2434;"></div>
+      <button id="videoModalClose" style="border:none;background:#f1f5f9;border-radius:8px;padding:6px 14px;cursor:pointer;font-size:13px;color:#475569;">✕ 关闭</button>
+    </div>
+    <video id="videoPlayer" controls style="width:100%;max-height:72vh;background:#000;border-radius:10px;"></video>
+  </div>
+</div>
+
+<script>
+"use strict";
+const $ = (id) => document.getElementById(id);
+const state = { sessionId: null, turns: 0, role: "student", exercises: [], chapters: [], videosCache: [] };
+
+/* ---------- 通用 ---------- */
+function toast(msg) {
+  const t = $("toast"); t.textContent = msg; t.style.display = "block";
+  clearTimeout(t._h); t._h = setTimeout(() => t.style.display = "none", 2600);
+}
+function esc(s) {
+  return String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+function fmt(s) {
+  return esc(s).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>").replace(/\n/g, "<br>");
+}
+/* ---------- 登录与用户状态 ---------- */
+const AUTH_KEY = "robotics_agent_token";
+const USER_KEY = "robotics_agent_user";
+let currentUser = null;
+
+function getToken() { return localStorage.getItem(AUTH_KEY) || ""; }
+function setToken(t) { localStorage.setItem(AUTH_KEY, t); }
+function clearAuth() { localStorage.removeItem(AUTH_KEY); localStorage.removeItem(USER_KEY); }
+
+function switchLoginTab(role) {
+  const s = $("loginTabStudent"), t = $("loginTabTeacher");
+  s.style.background = role === "student" ? "#eff6ff" : "#fff";
+  s.style.color = role === "student" ? "#1d4ed8" : "#6b7280";
+  s.style.fontWeight = role === "student" ? "600" : "400";
+  t.style.background = role === "teacher" ? "#eff6ff" : "#fff";
+  t.style.color = role === "teacher" ? "#1d4ed8" : "#6b7280";
+  t.style.fontWeight = role === "teacher" ? "600" : "400";
+  $("loginHint").innerHTML = role === "student"
+    ? "<b>测试账号：</b><br>学生：student01 / 123456（张三）<br>学生：student02 / 123456（李四）<br>学生：student03 / 123456（王五）"
+    : "<b>测试账号：</b><br>教师：pengpeng / pengpeng123（彭鹏）<br>管理员：admin / admin123";
+}
+
+async function doLogin() {
+  const username = $("loginUsername").value.trim();
+  const password = $("loginPassword").value;
+  const errEl = $("loginError");
+  if (!username || !password) { errEl.textContent = "请输入用户名和密码"; errEl.style.display = "block"; return; }
+  $("loginBtn").disabled = true; $("loginBtn").textContent = "登录中…";
+  try {
+    const resp = await fetch("/api/auth/login", {
+      method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({username, password}),
+    });
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.detail || "登录失败");
+    setToken(data.access_token);
+    currentUser = data.user;
+    localStorage.setItem(USER_KEY, JSON.stringify(data.user));
+    $("loginMask").style.display = "none";
+    updateUserBar();
+    setRole(data.user.role === "teacher" || data.user.role === "admin" ? "teacher" : "student");
+  } catch (e) {
+    errEl.textContent = e.message; errEl.style.display = "block";
+  } finally {
+    $("loginBtn").disabled = false; $("loginBtn").textContent = "登 录";
+  }
+}
+
+function doLogout() {
+  clearAuth();
+  currentUser = null;
+  $("userBar").style.display = "none";
+  $("loginMask").style.display = "flex";
+  $("loginUsername").value = ""; $("loginPassword").value = "";
+  $("loginError").style.display = "none";
+}
+
+function updateUserBar() {
+  if (!currentUser) { $("userBar").style.display = "none"; return; }
+  $("userBar").style.display = "block";
+  $("userName").textContent = currentUser.real_name || currentUser.username;
+  const roleMap = {student: "🎓 学生", teacher: "👨‍🏫 教师", admin: "⚙️ 管理员"};
+  $("userRole").textContent = (roleMap[currentUser.role] || currentUser.role) + (currentUser.class_name ? " · " + currentUser.class_name : "");
+  $("userAvatar").textContent = (currentUser.real_name || currentUser.username).charAt(0);
+}
+
+async function checkAuth() {
+  const token = getToken();
+  if (!token) { $("loginMask").style.display = "flex"; return; }
+  try {
+    const resp = await fetch("/api/auth/me", {headers: {"Authorization": "Bearer " + token}});
+    if (!resp.ok) throw new Error("token invalid");
+    currentUser = await resp.json();
+    localStorage.setItem(USER_KEY, JSON.stringify(currentUser));
+    updateUserBar();
+    updateRoleSwitchVisibility();
+    setRole(currentUser.role === "teacher" || currentUser.role === "admin" ? "teacher" : "student");
+  } catch (e) {
+    clearAuth();
+    $("loginMask").style.display = "flex";
+  }
+}
+
+async function api(path, opts) {
+  opts = opts || {};
+  opts.headers = opts.headers || {};
+  const token = getToken();
+  if (token) opts.headers["Authorization"] = "Bearer " + token;
+  const resp = await fetch(path, opts);
+  const data = await resp.json().catch(() => ({}));
+  if (!resp.ok) throw new Error(data.detail || ("HTTP " + resp.status));
+  return data;
+}
+async function ensureSession() {
+  if (state.sessionId) return state.sessionId;
+  const r = await api("/v1/sessions", { method: "POST" });
+  state.sessionId = r.session_id;
+  updateSide();
+  return r.session_id;
+}
+
+/* ---------- 角色与标签页 ---------- */
+function setRole(role) {
+  if (role === "teacher" && currentUser && currentUser.role === "student") {
+    toast("学生账号无权访问教师端");
+    return;
+  }
+  state.role = role;
+  $("roleStudent").classList.toggle("active", role === "student");
+  $("roleTeacher").classList.toggle("active", role === "teacher");
+  document.querySelectorAll("nav button").forEach(b => {
+    b.style.display = b.dataset.role === role ? "" : "none";
+  });
+  const first = document.querySelector(`nav button[data-role="${role}"]`);
+  if (first) switchTab(first.dataset.tab);
+}
+function updateRoleSwitchVisibility() {
+  if (currentUser && currentUser.role === "student") {
+    $("roleTeacher").style.display = "none";
+    $("roleStudent").style.flex = "1";
+  } else {
+    // admin/teacher始终显示两个按钮，可自由切换
+    $("roleTeacher").style.display = "";
+    $("roleStudent").style.display = "";
+    $("roleStudent").style.flex = "";
+  }
+}
+$("roleStudent").addEventListener("click", () => setRole("student"));
+$("roleTeacher").addEventListener("click", () => setRole("teacher"));
+
+function switchTab(tab) {
+  document.querySelectorAll("nav button").forEach(b =>
+    b.classList.toggle("active", b.dataset.tab === tab && b.dataset.role === state.role));
+  document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+  $("panel-" + tab).classList.add("active");
+  const lab = document.querySelector("nav button.active .lab");
+  if (lab) $("topbarTitle").textContent = lab.textContent;
+  if (tab === "graph") loadGraph();
+  if (tab === "videos") loadVideos();
+  if (tab === "course") loadCourse();
+  if (tab === "exercise") loadExercises();
+  if (tab === "recommend") loadRecommend();
+  if (tab === "self") loadSelf();
+  if (tab === "insight") loadInsight();
+  if (tab === "weak") loadWeak();
+  if (tab === "tools") loadTools();
+  if (tab === "assignments") loadTeacherAssignments();
+  if (tab === "students") loadStudents();
+  if (tab === "myhomework") loadMyAssignments();
+  if (tab === "mystudy") { loadStudyProfile(); loadRanking(); }
+}
+document.querySelectorAll("nav button").forEach(btn =>
+  btn.addEventListener("click", () => switchTab(btn.dataset.tab)));
+
+/* ---------- 作业管理（教师） ---------- */
+function showAssignmentForm() {
+  $("assignmentForm").style.display = "block";
+  $("newAsgTitle").value = ""; $("newAsgContent").value = "";
+}
+async function createAssignment() {
+  const title = $("newAsgTitle").value.trim();
+  const content = $("newAsgContent").value.trim();
+  if (!title) { toast("请输入作业标题"); return; }
+  try {
+    await api("/api/assignments", {method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({course_id:1, title, content, total_score:100, status:"published"})});
+    toast("作业发布成功");
+    $("assignmentForm").style.display = "none";
+    loadTeacherAssignments();
+  } catch(e) { toast("发布失败: " + e.message); }
+}
+async function loadTeacherAssignments() {
+  try {
+    const list = await api("/api/assignments");
+    if (!list.length) { $("teacherAssignmentsList").innerHTML = '<span class="muted">暂无作业</span>'; return; }
+    $("teacherAssignmentsList").innerHTML = list.map(a => `
+      <div style="border:1px solid #e4e3dd;border-radius:10px;padding:14px;margin-bottom:12px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <b style="font-size:15px;">${esc(a.title)}</b>
+          <span style="font-size:11px;padding:2px 8px;border-radius:10px;background:${a.status==='published'?'#dcfce7':'#fef3c7'};color:${a.status==='published'?'#15803d':'#92400e'};">${a.status==='published'?'已发布':'草稿'}</span>
+        </div>
+        <div style="font-size:12px;color:#6b7280;margin:6px 0;">满分 ${a.total_score} 分 | ${a.content ? esc(a.content.substring(0,80)) + '...' : '无详细内容'}</div>
+      </div>`).join("");
+  } catch(e) { $("teacherAssignmentsList").innerHTML = '<span style="color:#dc2626;">加载失败: ' + esc(e.message) + '</span>'; }
+}
+
+/* ---------- 学生管理（教师） ---------- */
+async function loadStudents() {
+  try {
+    const users = await api("/api/auth/users?role=student");
+    if (!users.length) { $("studentsList").innerHTML = '<span class="muted">暂无学生</span>'; return; }
+    $("studentsList").innerHTML = '<table style="width:100%;border-collapse:collapse;font-size:13px;">'
+      + '<tr style="background:#f9fafb;"><th style="text-align:left;padding:8px;border-bottom:1px solid #e4e3dd;">姓名</th>'
+      + '<th style="text-align:left;padding:8px;border-bottom:1px solid #e4e3dd;">用户名</th>'
+      + '<th style="text-align:left;padding:8px;border-bottom:1px solid #e4e3dd;">学号</th>'
+      + '<th style="text-align:left;padding:8px;border-bottom:1px solid #e4e3dd;">班级</th></tr>'
+      + users.map(u => `<tr><td style="padding:8px;border-bottom:1px solid #f0f0f0;">${esc(u.real_name||u.username)}</td>`
+      + `<td style="padding:8px;border-bottom:1px solid #f0f0f0;">${esc(u.username)}</td>`
+      + `<td style="padding:8px;border-bottom:1px solid #f0f0f0;">${esc(u.student_id||'-')}</td>`
+      + `<td style="padding:8px;border-bottom:1px solid #f0f0f0;">${esc(u.class_name||'-')}</td></tr>`).join("") + '</table>';
+  } catch(e) { $("studentsList").innerHTML = '<span style="color:#dc2626;">加载失败: ' + esc(e.message) + '</span>'; }
+}
+
+/* ---------- 我的作业（学生） ---------- */
+async function loadMyAssignments() {
+  try {
+    const list = await api("/api/assignments");
+    if (!list.length) { $("myAssignmentsList").innerHTML = '<span class="muted">暂无作业</span>'; return; }
+    $("myAssignmentsList").innerHTML = list.map(a => {
+      const ms = a.my_submission;
+      const graded = ms && ms.score !== null;
+      return `<div style="border:1px solid #e4e3dd;border-radius:10px;padding:14px;margin-bottom:12px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <b style="font-size:15px;">${esc(a.title)}</b>
+          <span style="font-size:11px;padding:2px 8px;border-radius:10px;background:${graded?'#dcfce7':(ms?'#fef3c7':'#f3f4f6')};color:${graded?'#15803d':(ms?'#92400e':'#6b7280')};">${graded?'已批改 ' + ms.score + '分':(ms?'待批改':'未提交')}</span>
+        </div>
+        <div style="font-size:12px;color:#6b7280;margin:6px 0;">满分 ${a.total_score} 分</div>
+        <div style="font-size:13px;margin:8px 0;white-space:pre-wrap;">${esc(a.content||'')}</div>
+        ${ms && ms.teacher_feedback ? `<div style="background:#f0fdf4;padding:8px 10px;border-radius:6px;font-size:12px;color:#15803d;margin-top:8px;">📝 教师反馈：${esc(ms.teacher_feedback)}</div>` : ''}
+        <textarea id="hw_${a.id}" rows="3" placeholder="输入你的作业答案..." style="width:100%;padding:8px;border:1px solid #e4e3dd;border-radius:6px;margin-top:8px;box-sizing:border-box;font-size:13px;">${ms ? esc(ms.content) : ''}</textarea>
+        <button onclick="submitHomework(${a.id})" style="margin-top:6px;padding:6px 14px;background:#3b82f6;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;">${ms ? '重新提交' : '提交作业'}</button>
+      </div>`;
+    }).join("");
+  } catch(e) { $("myAssignmentsList").innerHTML = '<span style="color:#dc2626;">加载失败: ' + esc(e.message) + '</span>'; }
+}
+async function submitHomework(id) {
+  const content = $("hw_" + id).value.trim();
+  if (!content) { toast("请输入作业答案"); return; }
+  try {
+    await api("/api/assignments/" + id + "/submit", {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({content})});
+    toast("作业提交成功");
+    loadMyAssignments();
+  } catch(e) { toast("提交失败: " + e.message); }
+}
+
+/* ---------- 学习记录（学生） ---------- */
+async function loadStudyProfile() {
+  try {
+    const p = await api("/api/study/profile");
+    $("studyProfile").innerHTML = `
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:16px;">
+        <div style="background:#eff6ff;padding:14px;border-radius:10px;text-align:center;"><div style="font-size:24px;font-weight:700;color:#1d4ed8;">${p.total_questions}</div><div style="font-size:12px;color:#6b7280;">总提问数</div></div>
+        <div style="background:#f0fdf4;padding:14px;border-radius:10px;text-align:center;"><div style="font-size:24px;font-weight:700;color:#15803d;">${p.total_exercises}</div><div style="font-size:12px;color:#6b7280;">总做题数</div></div>
+        <div style="background:#fef3c7;padding:14px;border-radius:10px;text-align:center;"><div style="font-size:24px;font-weight:700;color:#92400e;">${p.correct_rate}%</div><div style="font-size:12px;color:#6b7280;">正确率</div></div>
+        <div style="background:#f3e8ff;padding:14px;border-radius:10px;text-align:center;"><div style="font-size:24px;font-weight:700;color:#7c3aed;">${p.video_count}</div><div style="font-size:12px;color:#6b7280;">观看视频</div></div>
+      </div>
+      ${Object.keys(p.chapter_stats||{}).length ? '<h3 style="font-size:14px;margin-bottom:8px;">各章节掌握情况</h3>' + Object.entries(p.chapter_stats).map(([ch,st]) =>
+        `<div style="margin-bottom:8px;"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:2px;"><span>${esc(ch)}</span><span>${st.correct}/${st.total} (${st.rate}%)</span></div>
+        <div style="background:#e4e3dd;border-radius:4px;height:8px;"><div style="background:linear-gradient(90deg,#3b82f6,#1d4ed8);height:8px;border-radius:4px;width:${st.rate}%;"></div></div></div>`).join("") : '<span class="muted">暂无章节做题数据</span>'}`;
+  } catch(e) { $("studyProfile").innerHTML = '<span style="color:#dc2626;">加载失败: ' + esc(e.message) + '</span>'; }
+}
+async function loadRanking() {
+  try {
+    const rk = await api("/api/study/ranking?limit=10");
+    if (!rk.length) return;
+    $("studyRanking").innerHTML = '<h3 style="font-size:14px;margin-bottom:8px;">🏆 学习排行榜</h3>'
+      + '<table style="width:100%;border-collapse:collapse;font-size:13px;">'
+      + '<tr style="background:#f9fafb;"><th style="text-align:left;padding:6px;">排名</th><th style="text-align:left;padding:6px;">姓名</th><th style="text-align:left;padding:6px;">提问</th><th style="text-align:left;padding:6px;">做题</th><th style="text-align:left;padding:6px;">总分</th></tr>'
+      + rk.map(r => `<tr><td style="padding:6px;">${r.rank<=3?["🥇","🥈","🥉"][r.rank-1]:"#"+r.rank}</td><td style="padding:6px;">${esc(r.real_name||r.username)}</td><td style="padding:6px;">${r.question_count}</td><td style="padding:6px;">${r.exercise_count}</td><td style="padding:6px;font-weight:600;">${r.total_score}</td></tr>`).join("") + '</table>';
+  } catch(e) {}
+}
+
+/* ---------- 健康检查 ---------- */
+async function checkHealth() {
+  const el = $("status");
+  try {
+    await api("/health");
+    el.classList.add("online"); el.classList.remove("offline");
+    $("statusText").textContent = "服务运行中";
+  } catch {
+    el.classList.add("offline"); el.classList.remove("online");
+    $("statusText").textContent = "服务未连接";
+  }
+}
+checkHealth(); setInterval(checkHealth, 15000);
+loadVideosCache();
+setRole("student");
+checkAuth();
+loadHistorySessions();
+
+/* ---------- 视频课程 ---------- */
+function q(str) { return "'" + String(str).replace(/\\/g, "\\\\").replace(/'/g, "\\'") + "'"; }
+function normCh(ch) { return String(ch || "").replace(/第[0-9一二三四五六七八九十]+章/g, "").trim(); }
+function matchVideos(chapter) {
+  const n = normCh(chapter);
+  if (!n) return [];
+  return state.videosCache.filter(v => {
+    const vn = normCh(v.chapter);
+    return vn && (vn.includes(n) || n.includes(vn));
+  });
+}
+async function loadVideosCache() {
+  try { const d = await api("/v1/videos"); state.videosCache = d.videos || []; } catch (e) { /* 非关键，静默 */ }
+}
+async function loadVideos() {
+  const box = $("videoList");
+  box.innerHTML = '<span class="muted">加载中…</span>';
+  try {
+    const d = await api("/v1/videos");
+    state.videosCache = d.videos || [];
+    const chs = Object.keys(d.by_chapter || {});
+    if (!chs.length) {
+      box.innerHTML = '<div class="empty-tip">暂无视频课程。<br>可将教学视频放入知识库 <b>video</b> 目录，运行 <b>scripts/gen_video_manifest.py</b> 生成清单后重建索引。</div>';
+      return;
+    }
+    box.innerHTML = chs.map(ch =>
+      '<div style="margin-bottom:16px">' +
+      '<div style="font-size:13.5px;font-weight:700;color:var(--primary-dark);margin-bottom:8px;display:flex;align-items:center;gap:8px">' +
+      '<span style="width:6px;height:6px;border-radius:50%;background:var(--primary);display:inline-block"></span>' + esc(ch) +
+      '<span class="muted" style="font-weight:400">（' + d.by_chapter[ch].length + ' 个视频）</span></div>' +
+      '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px">' +
+      d.by_chapter[ch].map(v =>
+        '<div style="border:1px solid var(--border);border-radius:12px;padding:12px 14px;background:#fff;box-shadow:var(--shadow-sm);cursor:pointer;transition:all .18s" onclick="openVideo(' + q(esc(v.title)) + ',' + q(esc(v.video_url)) + ',' + q(esc(ch)) + ')">' +
+        '<div style="display:flex;align-items:center;gap:10px">' +
+        '<span style="width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;display:grid;place-items:center;font-size:15px;flex-shrink:0">▶</span>' +
+        '<div style="min-width:0"><div style="font-size:13.5px;font-weight:600;line-height:1.5">' + esc(v.title) + "</div>" +
+        '<div class="muted" style="font-size:11.5px;margin-top:2px">' + esc(v.video_url) +
+        (v.duration ? " · " + esc(v.duration) : "") + "</div></div></div>" +
+        (v.description ? '<div style="font-size:12px;color:#475569;margin-top:8px;line-height:1.7">' + esc(v.description) + "</div>" : "") +
+        "</div>").join("") + "</div></div>").join("");
+  } catch (e) {
+    box.innerHTML = '<span style="color:var(--bad)">视频加载失败：' + esc(e.message) + "</span>";
+  }
+}
+window.openVideo = function (title, url, chapter) {
+  $("videoModalTitle").textContent = title;
+  const p = $("videoPlayer");
+  p.src = url;
+  $("videoModal").style.display = "flex";
+  p.play().catch(function () {});
+  // 记录视频观看（登录用户）
+  if (currentUser) {
+    try {
+      fetch("/api/study/videos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + (localStorage.getItem("token") || "") },
+        body: JSON.stringify({ video_id: url, chapter: chapter || "", watch_duration: 1, progress: 0.01 })
+      }).catch(function() {});
+    } catch(e) {}
+  }
+};
+function closeVideo() {
+  const p = $("videoPlayer");
+  p.pause(); p.removeAttribute("src"); p.load();
+  $("videoModal").style.display = "none";
+}
+$("videoModalClose").addEventListener("click", closeVideo);
+$("videoModal").addEventListener("click", function (e) { if (e.target === this) closeVideo(); });
+$("videoRefreshBtn").addEventListener("click", loadVideos);
+
+/* ---------- 课程信息 ---------- */
+async function loadCourse() {
+  const box = $("courseContent");
+  box.innerHTML = '<span class="muted">加载中…</span>';
+  try {
+    const d = await api("/v1/course/meta");
+    const tb = d.textbook || {};
+    const refs = (d.references || []).map(r => "《" + esc(r.name) + "》" + (r.authors ? "（" + esc(r.authors) + "）" : "") + (r.publisher ? "，" + esc(r.publisher) + (r.year || "") : "")).join("<br>");
+    const chs = (d.chapters || []).map(c =>
+      '<tr><td style="white-space:nowrap">第' + esc(c.no) + "章 " + esc(c.name) + '</td><td>' + esc(c.hours) + "学时</td><td>" +
+      esc((c.topics || []).join("、")) + "</td><td>" + esc(c.knowledge_requirements || "") + "</td></tr>").join("");
+    const goals = (d.course_goals || []).map(g =>
+      '<div style="padding:8px 12px;background:#f8faff;border-radius:8px;margin-bottom:6px;font-size:13px;line-height:1.7"><b>目标' + esc(g.id) + "：</b>" + esc(g.description) + "</div>").join("");
+    box.innerHTML =
+      '<div class="stat-grid" style="margin-bottom:14px">' +
+      '<div class="stat"><div class="num">' + esc(d.course_name_cn) + '</div><div class="lab">' + esc(d.course_name_en) + " · " + esc(d.course_code) + "</div></div>" +
+      '<div class="stat"><div class="num">' + esc(d.instructor) + '</div><div class="lab">任课教师（课程负责人）</div></div>' +
+      '<div class="stat"><div class="num">' + esc(d.hours) + "/" + esc(d.credits) + '</div><div class="lab">学时 / 学分</div></div>' +
+      '<div class="stat"><div class="num">' + esc(d.course_nature) + '</div><div class="lab">课程性质 · ' + esc(d.major) + "</div></div></div>" +
+      '<div class="card" style="margin-bottom:14px"><h2>基本信息</h2>' +
+      '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:8px;font-size:13px;line-height:1.9">' +
+      "<div><b>开课单位：</b>" + esc(d.department) + "</div>" +
+      "<div><b>专业负责人：</b>" + esc(d.professional_leader) + "</div>" +
+      "<div><b>课程负责人：</b>" + esc(d.course_leader) + "</div>" +
+      "<div><b>制定时间：</b>" + esc(d.revised_at) + "</div>" +
+      "<div><b>学时分配：</b>授课" + esc(d.hours_breakdown && d.hours_breakdown.lecture) + "学时</div>" +
+      "<div><b>先修课程：</b>" + esc((d.prerequisites || []).join("、")) + "</div></div></div>" +
+      '<div class="card" style="margin-bottom:14px"><h2>教材与参考书</h2>' +
+      '<div style="font-size:13px;line-height:1.9"><b>选用教材：</b>《' + esc(tb.name) + "》，" + esc(tb.authors) + "，" + esc(tb.publisher) + (tb.year || "") + "，ISBN " + esc(tb.isbn) + "</div>" +
+      '<div style="font-size:13px;line-height:1.9;margin-top:8px"><b>主要参考书：</b><br>' + refs + "</div></div>" +
+      '<div class="card" style="margin-bottom:14px"><h2>考核方式</h2>' +
+      '<div style="font-size:13px;line-height:1.9"><b>成绩构成：</b>' + esc(d.assessment) + "</div>" +
+      '<div style="font-size:13px;line-height:1.9;margin-top:6px">' + esc(d.assessment_detail) + "</div></div>" +
+      '<div class="card" style="margin-bottom:14px"><h2>课程目标</h2>' + goals + "</div>" +
+      '<div class="card"><h2>教学大纲（十章）</h2>' +
+      '<table><thead><tr><th>章节</th><th>学时</th><th>教学内容</th><th>知识与能力要求</th></tr></thead><tbody>' + chs + "</tbody></table></div>";
+  } catch (e) {
+    box.innerHTML = '<span style="color:var(--bad)">课程信息加载失败：' + esc(e.message) + "</span>";
+  }
+}
+$("courseRefreshBtn").addEventListener("click", loadCourse);
+
+/* ---------- 对话 ---------- */
+function addMsg(role, html) {
+  const div = document.createElement("div");
+  div.className = "msg " + (role === "user" ? "user" : "bot");
+  div.innerHTML = html;
+  const box = $("messages");
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+  return div;
+}
+async function send() {
+  const input = $("chatInput");
+  const question = input.value.trim();
+  if (!question) return;
+  await ensureSession();
+  const btn = $("sendBtn"); btn.disabled = true;
+  addMsg("user", fmt(question));
+  input.value = "";
+  const botDiv = addMsg("bot", '<span class="muted">思考中…</span>');
+  try {
+    const resp = await fetch("/v1/chat/stream", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ session_id: state.sessionId, question })
+    });
+    if (!resp.ok || !resp.body) throw new Error("HTTP " + resp.status);
+    const reader = resp.body.getReader();
+    const dec = new TextDecoder("utf-8");
+    let buf = "", meta = null, answer = "";
+    const bodyEl = document.createElement("div");
+    bodyEl.className = "stream-body";
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buf += dec.decode(value, { stream: true });
+      const events = buf.split("\n\n");
+      buf = events.pop() || "";
+      for (const ev of events) {
+        const lines = ev.split("\n");
+        const type = (lines.find(l => l.startsWith("event:")) || "").slice(6).trim();
+        const dataLine = (lines.find(l => l.startsWith("data:")) || "").slice(5).trim();
+        if (!dataLine) continue;
+        const data = JSON.parse(dataLine);
+        if (type === "meta") { meta = data; }
+        else if (type === "delta") { answer += data.text; }
+        else if (type === "done") { /* 结束 */ }
+        else if (type === "error") { throw new Error(data.detail || "服务异常"); }
+      }
+      if (meta && !botDiv.querySelector(".stream-body")) {
+        botDiv.innerHTML = "";
+        botDiv.appendChild(bodyEl);
+        bodyEl.textContent = answer;
+      } else if (meta) {
+        bodyEl.textContent = answer;
+      }
+      $("messages").scrollTop = $("messages").scrollHeight;
+    }
+    if (!meta) throw new Error("未收到服务端响应");
+    state.sessionId = meta.session_id;
+    state.turns++;
+    renderBotMessage(botDiv, Object.assign(meta, { answer }), question);
+    updateSide();
+  } catch (e) {
+    botDiv.innerHTML = '<span style="color:var(--bad)">请求失败：' + esc(e.message) + "</span>";
+  } finally { btn.disabled = false; input.focus(); }
+}
+function renderBotMessage(container, r, question) {
+  const badges = [
+    r.knowledge_base_hit ? '<span class="badge ok">知识库命中 ' + r.best_score + "</span>"
+                         : '<span class="badge warn">未命中 · 学习引导</span>',
+    '<span class="badge plain">意图：' + esc(r.intent) + "</span>",
+    '<span class="badge plain">检索：' + esc(r.retrieval_mode) + "</span>",
+    '<span class="badge plain">生成：' + esc(r.generation_mode) + "</span>"
+  ].join("");
+  const sources = (r.sources || []).map(s => {
+    let actionBtn = "";
+    if (s.resource_url) {
+      if (s.resource_type === "video") {
+        actionBtn = ' <a href="' + esc(s.resource_url) + '" target="_blank" style="display:inline-block;margin-top:4px;padding:3px 10px;border-radius:14px;background:#dcfce7;color:#15803d;font-size:12px;text-decoration:none">▶ 播放视频</a>';
+      } else {
+        const typeLabel = {ppt: "PPT", pdf: "PDF", doc: "文档", exercise: "题库", syllabus: "大纲"}[s.resource_type] || "下载";
+        actionBtn = ' <a href="' + esc(s.resource_url) + '" download style="display:inline-block;margin-top:4px;padding:3px 10px;border-radius:14px;background:#eff6ff;color:#1d4ed8;font-size:12px;text-decoration:none">📥 下载' + typeLabel + "</a>";
+      }
+    } else if (s.video_url) {
+      actionBtn = ' <span class="badge ok" style="cursor:pointer" onclick="openVideo(' + q(esc(s.source)) + ',' + q(esc(s.video_url)) + ')">🎬 观看视频</span>';
+    }
+    return '<div class="src"><b>[' + esc(s.source) + "]</b> " + esc(s.chapter || "") +
+      (s.page ? " · 第" + esc(s.page) + "页" : "") + (s.score ? " · 相似度 " + s.score : "") +
+      actionBtn +
+      (s.text ? '<div style="margin-top:4px">' + esc(s.text) + (s.resource_url ? "" : "…") + "</div>" : "") +
+      "</div>";
+  }).join("");
+  let sourcesBlock = "";
+  if (r.intent === "course_info") {
+    sourcesBlock = '<div style="margin-top:8px"><span class="badge plain">📋 来源：课程教学大纲</span></div>';
+  } else if (r.intent === "resource") {
+    sourcesBlock = '<div style="margin-top:10px">' + sources + "</div>";
+  } else if (r.sources && r.sources.length) {
+    sourcesBlock = '<details style="margin-top:8px"><summary style="cursor:pointer;color:var(--muted);font-size:12px;user-select:none">📚 知识点来源（' + r.sources.length + '）· 点击展开</summary><div style="margin-top:6px">' + sources + "</div></details>";
+  }
+  const chapSrc = (r.sources && r.sources[0] && r.sources[0].chapter) || "";
+  const vids = matchVideos(chapSrc);
+  const vidCards = vids.length
+    ? '<div style="margin-top:8px;padding:10px 12px;background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;font-size:12.5px;line-height:1.8">🎬 <b>本章节配套视频课程</b>' +
+      vids.map(v => '<span style="display:inline-block;margin:4px 6px 0 0;padding:4px 10px;border-radius:16px;background:#ffedd5;color:#9a3412;cursor:pointer;font-size:12px" onclick="openVideo(' + q(esc(v.title)) + ',' + q(esc(v.video_url)) + ')">▶ ' + esc(v.title) + "</span>").join("") +
+      "</div>"
+    : "";
+  const trace = (r.trace || []).map(t =>
+    '<div class="trace-node">' + esc(t.node) +
+    (t.status && t.status !== "ok" ? ' <span style="color:var(--warn)">(' + esc(t.status) + ")</span>" : "") +
+    "</div>").join("");
+  const stars = '<div class="stars">本回答质量：<span class="star" data-v="1">★</span><span class="star" data-v="2">★</span><span class="star" data-v="3">★</span><span class="star" data-v="4">★</span><span class="star" data-v="5">★</span></div>';
+  const followup = r.followup_question
+    ? '<div class="followup" title="点击填入输入框">💬 ' + esc(r.followup_question) + "</div>" : "";
+  container.innerHTML =
+    fmt(r.answer) + '<div class="badges">' + badges + "</div>" + sourcesBlock + vidCards + followup + stars +
+    "<details><summary>流程轨迹</summary>" + trace + "</details>";
+  if (followup) container.querySelector(".followup").addEventListener("click", function () {
+    $("chatInput").value = this.textContent.replace(/^💬 /, "").trim();
+    $("chatInput").focus();
+  });
+  container.querySelectorAll(".star").forEach(st => st.addEventListener("click", function () {
+    const v = Number(this.dataset.v);
+    container.querySelectorAll(".star").forEach((s, i) => s.classList.toggle("on", i < v));
+    submitFeedback(question, v);
+  }));
+  // MathJax 公式兜底渲染（若模型输出了 LaTeX 公式）
+  if (window.MathJax && window.MathJax.typesetPromise) {
+    window.MathJax.typesetPromise([container]).catch(function () {});
+  }
+}
+async function submitFeedback(question, rating) {
+  try {
+    await api("/v1/feedback", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ session_id: state.sessionId, question, rating })
+    });
+    toast("感谢反馈！评分 " + rating + " 星已记录");
+  } catch (e) { toast("反馈提交失败：" + e.message); }
+}
+function updateSide() {
+  $("sidState").textContent = state.sessionId ? "进行中" : "未开始";
+  $("sidVal").textContent = state.sessionId || "—";
+  $("turnCount").textContent = state.turns;
+}
+$("sendBtn").addEventListener("click", send);
+$("chatInput").addEventListener("keydown", e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === "Enter") send();
+});
+$("newSessionBtn").addEventListener("click", async () => {
+  state.sessionId = null; state.turns = 0; updateSide();
+  $("messages").innerHTML = '<div class="welcome">新会话已开始，请输入你的问题。</div>';
+  loadHistorySessions();
+  toast("已开始新会话（旧会话已保留在历史记录中）");
+});
+async function loadHistorySessions() {
+  try {
+    const d = await api("/v1/sessions/history?limit=30");
+    const list = d.sessions || [];
+    if (!list.length) { $("historyList").innerHTML = '<span class="muted">暂无历史会话</span>'; return; }
+    $("historyList").innerHTML = list.map(function(sess) {
+      const active = sess.session_id === state.sessionId;
+      return '<div style="padding:6px 8px;border-radius:6px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;background:' + (active ? '#eff6ff' : 'transparent') + ';">'
+        + '<div style="flex:1;min-width:0;" onclick="loadSessionMessages(\'' + sess.session_id + '\')">'
+        + '<div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:' + (active ? '#1d4ed8' : '#374151') + ';font-weight:' + (active ? '600' : '400') + ';">' + esc(sess.title) + '</div>'
+        + '<div style="font-size:10px;color:#9ca3af;">' + esc(sess.time_str) + '</div></div>'
+        + '<button onclick="event.stopPropagation();deleteHistorySession(\'' + sess.session_id + '\')" style="background:none;border:none;color:#dc2626;font-size:11px;cursor:pointer;padding:2px 4px;">x</button>'
+        + '</div>';
+    }).join("");
+  } catch (e) { $("historyList").innerHTML = '<span style="color:#dc2626;font-size:11px;">加载失败</span>'; }
+}
+
+async function loadSessionMessages(sessionId) {
+  try {
+    const d = await api("/v1/sessions/" + sessionId + "/messages");
+    const msgs = d.messages || [];
+    state.sessionId = sessionId;
+    state.turns = msgs.length;
+    updateSide();
+    if (!msgs.length) { $("messages").innerHTML = '<div class="welcome">该会话暂无消息。</div>'; }
+    else {
+      $("messages").innerHTML = msgs.map(function(m) {
+        return '<div class="msg user"><div class="role">你</div><div class="bubble">' + fmt(m.question) + '</div></div>'
+          + '<div class="msg bot"><div class="role">智能体</div><div class="bubble">' + fmt(m.answer) + '</div></div>';
+      }).join("");
+    }
+    loadHistorySessions();
+    $("messages").scrollTop = $("messages").scrollHeight;
+    toast("已加载历史会话（" + msgs.length + "条消息）");
+  } catch (e) { toast("加载历史会话失败：" + e.message); }
+}
+
+async function deleteHistorySession(sessionId) {
+  if (!confirm("确定删除这条历史会话吗？")) return;
+  try {
+    await api("/v1/sessions/" + sessionId + "/history", { method: "DELETE" });
+    if (state.sessionId === sessionId) {
+      state.sessionId = null; state.turns = 0; updateSide();
+      $("messages").innerHTML = '<div class="welcome">会话已删除，请输入新问题。</div>';
+    }
+    loadHistorySessions();
+    toast("历史会话已删除");
+  } catch (e) { toast("删除失败：" + e.message); }
+}
+
+
+/* ---------- 知识图谱（ECharts 力导向网状图） ---------- */
+let graphChart = null;
+let graphData = null;
+let graphFilterType = "all";
+
+async function loadGraph() {
+  if (graphData) { renderGraph(); return; }
+  try {
+    graphData = await api("/v1/graph/network");
+    renderGraph();
+  } catch (e) {
+    $("graphNetwork").innerHTML = '<div style="padding:40px;text-align:center;color:#dc2626;">图谱加载失败：' + esc(e.message) + '</div>';
+  }
+}
+
+function renderGraph() {
+  if (!graphData || !graphData.nodes) return;
+  const el = $("graphNetwork");
+  if (!graphChart) {
+    graphChart = echarts.init(el);
+    graphChart.on("click", function(params) {
+      if (params.dataType === "node") showGraphNode(params.data);
+    });
+    window.addEventListener("resize", function() { if (graphChart) graphChart.resize(); });
+  }
+
+  // 过滤节点
+  let nodes = graphData.nodes;
+  if (graphFilterType !== "all") {
+    const ids = new Set(nodes.filter(n => n.type === graphFilterType).map(n => n.id));
+    // 保留与过滤节点相连的边的另一端
+    graphData.links.forEach(l => {
+      if (ids.has(l.source) || ids.has(l.target)) { ids.add(l.source); ids.add(l.target); }
+    });
+    nodes = nodes.filter(n => ids.has(n.id));
+  }
+  const nodeIds = new Set(nodes.map(n => n.id));
+  const links = graphData.links.filter(l => nodeIds.has(l.source) && nodeIds.has(l.target));
+
+  const typeLabel = {chapter: "章节", section: "小节", concept: "知识点"};
+  const option = {
+    tooltip: {
+      formatter: function(p) {
+        if (p.dataType === "node") {
+          return '<b>' + p.data.name + '</b><br/>类型：' + (typeLabel[p.data.type] || p.data.type) +
+                 (p.data.desc ? '<br/>' + p.data.desc.substring(0, 60) : '');
+        }
+        return p.data.type || '关系';
+      }
+    },
+    legend: [{ data: ["章节", "小节", "知识点"], top: 8, right: 16, textStyle: {fontSize: 12} }],
+    series: [{
+      type: "graph",
+      layout: "force",
+      roam: true,
+      draggable: true,
+      force: { repulsion: 180, edgeLength: [60, 140], gravity: 0.08 },
+      label: { show: true, position: "right", fontSize: 11, formatter: "{b}" },
+      edgeSymbol: ["none", "arrow"],
+      edgeSymbolSize: 6,
+      lineStyle: { color: "#cbd5e1", width: 1.2, curveness: 0.1 },
+      emphasis: { focus: "adjacency", lineStyle: { width: 3, color: "#6366f1" } },
+      data: nodes.map(n => ({
+        id: n.id, name: n.name,
+        category: typeLabel[n.type] || n.type,
+        symbolSize: n.symbolSize || 20,
+        itemStyle: n.itemStyle || {color: "#6b7280"},
+        desc: n.desc || "",
+        type: n.type,
+        chapter: n.chapter
+      })),
+      links: links.map(l => ({
+        source: l.source, target: l.target,
+        lineStyle: { type: l.type === "prerequisite" ? "solid" : (l.type === "contains" ? "dashed" : "dotted"),
+                     color: l.type === "prerequisite" ? "#f59e0b" : (l.type === "contains" ? "#94a3b8" : "#a5b4fc") }
+      })),
+      categories: [
+        {name: "章节", itemStyle: {color: "#6366f1"}},
+        {name: "小节", itemStyle: {color: "#06b6d4"}},
+        {name: "知识点", itemStyle: {color: "#10b981"}}
+      ]
+    }]
+  };
+  graphChart.setOption(option, true);
+}
+
+function graphFilter(type) {
+  graphFilterType = type;
+  document.querySelectorAll(".graph-filter-btn").forEach(b =>
+    b.classList.toggle("active", b.dataset.f === type));
+  if (graphData) renderGraph();
+}
+
+function showGraphNode(node) {
+  const box = $("graphNodeDetail");
+  const content = $("graphDetailContent");
+  box.style.display = "block";
+  // 查找邻居
+  const neighbors = {prerequisite: [], successor: [], contains: [], related: [], applies: []};
+  graphData.links.forEach(l => {
+    if (l.source === node.id) {
+      const t = graphData.nodes.find(n => n.id === l.target);
+      if (t) neighbors[l.type] ? neighbors[l.type].push(t) : neighbors.related.push(t);
+    } else if (l.target === node.id) {
+      const s = graphData.nodes.find(n => n.id === l.source);
+      if (s) {
+        if (l.type === "prerequisite") neighbors.successor.push(s);
+        else if (l.type === "contains") neighbors.related.push(s);
+        else neighbors.related.push(s);
+      }
+    }
+  });
+  const typeLabel = {chapter: "📖 章节", section: "📑 小节", concept: "💡 知识点"};
+  const tagColor = {prerequisite: "#fef3c7,#92400e", successor: "#dbeafe,#1e40af",
+                    contains: "#f3f4f6,#374151", related: "#e0e7ff,#4338ca", applies: "#dcfce7,#166534"};
+  let html = '<div class="graph-detail-card" style="margin-bottom:10px;">'
+    + '<div style="font-size:16px;font-weight:700;margin-bottom:4px;">' + esc(node.name) + '</div>'
+    + '<div style="font-size:12px;color:#6b7280;">' + (typeLabel[node.type] || node.type)
+    + (node.chapter ? ' · 第' + node.chapter + '章' : '') + '</div>'
+    + (node.desc ? '<div style="font-size:13px;margin-top:8px;color:#374151;">' + esc(node.desc) + '</div>' : '')
+    + '</div>';
+  const sections = [["前置知识", "prerequisite"], ["后继内容", "successor"], ["包含", "contains"], ["相关概念", "related"], ["应用", "applies"]];
+  sections.forEach(([label, key]) => {
+    if (neighbors[key] && neighbors[key].length) {
+      const [bg, fg] = (tagColor[key] || "#f3f4f6,#374151").split(",");
+      html += '<div style="margin-bottom:8px;"><span style="font-size:12px;font-weight:600;color:#6b7280;">' + label + '：</span>'
+        + neighbors[key].map(n => '<span class="graph-neighbor-tag" style="background:' + bg + ';color:' + fg + ';" onclick="focusGraphNode(\'' + n.id + '\')">' + esc(n.name) + '</span>').join("")
+        + '</div>';
+    }
+  });
+  content.innerHTML = html;
+}
+
+function focusGraphNode(id) {
+  if (!graphChart) return;
+  graphChart.dispatchAction({type: "focusNodeAdjacency", seriesIndex: 0, dataIndex: id});
+  const node = graphData.nodes.find(n => n.id === id);
+  if (node) showGraphNode(node);
+}
+
+async function graphSearch() {
+  const q = $("graphSearchInput").value.trim();
+  const box = $("graphSearchResult");
+  if (!q) { toast("请输入知识点"); return; }
+  box.textContent = "查询中…";
+  try {
+    // 在图谱数据中搜索
+    if (!graphData) graphData = await api("/v1/graph/network");
+    const matches = graphData.nodes.filter(n =>
+      n.name.includes(q) || (n.desc && n.desc.includes(q)));
+    if (!matches.length) {
+      box.innerHTML = '<span class="muted">未在知识图谱中找到"' + esc(q) + '"相关节点。图谱覆盖10章、42小节、22个核心知识点。</span>';
+      return;
+    }
+    box.className = "";
+    box.innerHTML = '<div style="font-size:13px;margin-bottom:8px;">找到 <b>' + matches.length + '</b> 个相关节点，点击可在图谱中定位：</div>'
+      + matches.slice(0, 10).map(n => {
+          const typeLabel = {chapter: "章节", section: "小节", concept: "知识点"};
+          return '<span class="graph-neighbor-tag" style="background:#eef2ff;color:#4338ca;padding:6px 14px;font-size:12px;" onclick="focusGraphNode(\'' + n.id + '\');switchTab(\'graph\');">'
+            + esc(n.name) + ' <span style="opacity:.6;font-size:10px;">[' + (typeLabel[n.type]||'') + ']</span></span>';
+        }).join("");
+  } catch (e) { box.innerHTML = '<span style="color:#dc2626;">查询失败：' + esc(e.message) + '</span>'; }
+}
+$("graphSearchBtn").addEventListener("click", graphSearch);
+$("graphSearchInput").addEventListener("keydown", e => { if (e.key === "Enter") graphSearch(); });
+
+/* ---------- 习题自测 ---------- */
+async function loadExercises() {
+  const box = $("exList");
+  box.innerHTML = '<span class="muted">抽题中…</span>';
+  try {
+    const d = await api("/v1/exercises?limit=5");
+    state.exercises = d.exercises || [];
+    if (!state.exercises.length) { box.innerHTML = '<div class="empty-tip">暂时没有可抽取的习题。<br>请确认知识库中已包含教材/课件或"题目：…参考答案：…"格式的题库资料。</div>'; return; }
+    box.innerHTML = state.exercises.map(function(ex, i) {
+      const qtype = ex.qtype || "short";
+      const typeLabel = {single: "单选题", multiple: "多选题", short: "简答题"}[qtype] || "简答题";
+      const qtext = ex.question_display || ex.question;
+      let inputHtml = "";
+      if (qtype === "single") {
+        inputHtml = '<div style="margin:8px 0;">' + Object.entries(ex.options || {}).map(function(entry) {
+          return '<label style="display:block;padding:4px 0;cursor:pointer;"><input type="radio" name="exOpt' + i + '" value="' + entry[0] + '" style="margin-right:6px;">' + entry[0] + '. ' + esc(entry[1]) + '</label>';
+        }).join("") + '</div>';
+      } else if (qtype === "multiple") {
+        inputHtml = '<div style="margin:8px 0;">' + Object.entries(ex.options || {}).map(function(entry) {
+          return '<label style="display:block;padding:4px 0;cursor:pointer;"><input type="checkbox" name="exOpt' + i + '" value="' + entry[0] + '" style="margin-right:6px;">' + entry[0] + '. ' + esc(entry[1]) + '</label>';
+        }).join("") + '</div>';
+      } else {
+        inputHtml = '<div class="form-row" style="margin:8px 0"><textarea rows="3" placeholder="在此输入你的作答…" id="exAns' + i + '"></textarea></div>';
+      }
+      const isTeacher = currentUser && (currentUser.role === "teacher" || currentUser.role === "admin");
+      const answerBtn = isTeacher
+        ? '<button class="btn ghost sm" onclick="toggleAnswer(' + i + ')">查看参考答案</button>'
+        : '<button class="btn ghost sm" onclick="toggleAnswer(' + i + ')" id="exAnsBtn' + i + '" style="display:none;">查看参考答案</button>';
+      return '<div class="ex-card" id="exCard' + i + '">' +
+        '<div class="q">' + (i + 1) + '. ' + esc(qtext) + '</div>' +
+        '<div class="meta"><span class="tag' + (ex.generated ? " warn" : "") + '">' + (ex.generated ? "AI 生成" : "题库") +
+        '</span><span class="tag" style="background:#eef2ff;color:#4338ca;margin-left:4px;">' + typeLabel + '</span>来源：' + esc(ex.source || "—") +
+        (ex.chapter ? " · " + esc(ex.chapter) : "") + "</div>" +
+        inputHtml +
+        '<button class="btn sm" onclick="submitExercise(' + i + ')">提交作答</button> ' +
+        answerBtn +
+        '<div id="exResult' + i + '"></div></div>';
+    }).join("");
+  } catch (e) { box.innerHTML = '<span style="color:var(--bad)">抽题失败：' + esc(e.message) + "</span>"; }
+}
+window.toggleAnswer = function (i) {
+  const ex = state.exercises[i];
+  const box = $("exResult" + i);
+  const existing = box.querySelector(".ref");
+  if (existing) { existing.remove(); return; }
+  box.insertAdjacentHTML("beforeend", '<div class="ref" style="margin-top:10px"><b>参考答案：</b>' + esc(ex.answer) + "</div>");
+};
+window.submitExercise = async function (i) {
+  const ex = state.exercises[i];
+  const qtype = ex.qtype || "short";
+  let answer = "";
+  if (qtype === "single") {
+    const sel = document.querySelector('input[name="exOpt' + i + '"]:checked');
+    answer = sel ? sel.value : "";
+    if (!answer) { toast("请先选择答案"); return; }
+  } else if (qtype === "multiple") {
+    const sels = document.querySelectorAll('input[name="exOpt' + i + '"]:checked');
+    answer = Array.from(sels).map(function(x) { return x.value; }).sort().join("");
+    if (!answer) { toast("请先选择答案"); return; }
+  } else {
+    answer = $("exAns" + i).value.trim();
+    if (!answer) { toast("请先输入作答内容"); return; }
+  }
+  const sid = await ensureSession();
+  const box = $("exResult" + i);
+  box.innerHTML = '<p class="muted">批阅中…</p>';
+  try {
+    const r = await api("/v1/homework/judge", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ session_id: sid, question_text: ex.question, student_answer: answer })
+    });
+    const pct = Math.round(r.score * 100);
+    const color = r.score >= 0.8 ? "var(--ok)" : r.score >= 0.5 ? "var(--warn)" : "var(--bad)";
+    const modeName = { exact: "精确匹配", keyword: "要点比对", llm: "诊断反馈（教师复核）", none: "空作答" }[r.mode] || r.mode;
+    box.innerHTML = '<div class="result-box">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center"><b>得分：' + pct +
+      ' 分</b><span class="badge plain">批阅方式：' + esc(modeName) + "</span></div>" +
+      '<div class="score-bar"><div style="width:' + pct + "%;background:" + color + '"></div></div>' +
+      '<div>' + fmt(r.feedback) + "</div>" +
+      (r.reference ? '<div class="ref"><b>参考答案：</b>' + esc(r.reference) + "</div>" : "") + "</div>";
+    const ansBtn = document.getElementById("exAnsBtn" + i);
+    if (ansBtn) ansBtn.style.display = "";
+    // 提交成功后禁用提交按钮和输入
+    const card = document.getElementById("exCard" + i);
+    if (card) {
+      const submitBtn = card.querySelector('button[onclick^="submitExercise"]');
+      if (submitBtn) { submitBtn.disabled = true; submitBtn.style.opacity = "0.5"; submitBtn.style.cursor = "not-allowed"; submitBtn.textContent = "已提交"; }
+      // 禁用输入
+      card.querySelectorAll("input, textarea").forEach(function(el) { el.disabled = true; });
+    }
+  } catch (e) {
+    // 捕获重复提交错误（400）
+    if (e.message && e.message.indexOf("已提交") >= 0) {
+      box.innerHTML = '<p style="color:var(--warn)">该题已提交过，请勿重复提交。可在学习记录中查看历史作答。</p>';
+      // 禁用按钮
+      const card = document.getElementById("exCard" + i);
+      if (card) {
+        const submitBtn = card.querySelector('button[onclick^="submitExercise"]');
+        if (submitBtn) { submitBtn.disabled = true; submitBtn.style.opacity = "0.5"; submitBtn.style.cursor = "not-allowed"; submitBtn.textContent = "已提交"; }
+      }
+    } else {
+      box.innerHTML = '<p style="color:var(--bad)">批阅失败：' + esc(e.message) + "</p>";
+    }
+  }
+};
+$("exRefreshBtn").addEventListener("click", loadExercises);
+
+/* ---------- 学习推荐 ---------- */
+async function loadRecommend() {
+  const box = $("recList");
+  box.innerHTML = '<span class="muted">加载中…</span>';
+  try {
+    const sid = await ensureSession();
+    const d = await api("/v1/recommend?session_id=" + encodeURIComponent(sid));
+    box.innerHTML = (d.recommendations || []).map(r => {
+      const tagCls = r.type === "习题订正" ? "warn" : r.type === "知识补强" ? "" : "ok";
+      const actName = { chat: "去提问", exercise: "去自测", graph: "看图谱" }[r.action] || "查看";
+      return '<div class="rec-card"><span class="tag ' + tagCls + '">' + esc(r.type) + "</span>" +
+        '<div class="q" style="margin-top:6px">' + esc(r.title) + "</div>" +
+        '<div class="reason">' + esc(r.reason) + "</div>" +
+        '<button class="btn sm" data-act="' + r.action + '" data-title="' + esc(r.title) + '">' + actName + "</button></div>";
+    }).join("");
+    box.querySelectorAll("button[data-act]").forEach(b => b.addEventListener("click", function () {
+      const act = this.dataset.act;
+      if (act === "chat") { $("chatInput").value = this.dataset.title; switchTab("chat"); $("chatInput").focus(); }
+      else if (act === "exercise") switchTab("exercise");
+      else switchTab("graph");
+    }));
+  } catch (e) { box.innerHTML = '<span style="color:var(--bad)">推荐加载失败：' + esc(e.message) + "</span>"; }
+}
+
+/* ---------- 自我评估 ---------- */
+async function loadSelf() {
+  try {
+    const sid = await ensureSession();
+    const d = await api("/v1/self-assessment?session_id=" + encodeURIComponent(sid));
+    $("selfCards").innerHTML = [
+      [d.total_questions, "提问次数"],
+      [d.hit_rate == null ? "—" : (d.hit_rate * 100).toFixed(0) + "%", "知识库命中率"],
+      [d.homework_count, "自测题数"],
+      [d.homework_avg_score == null ? "—" : Math.round(d.homework_avg_score * 100) + "分", "自测平均分"],
+    ].map(x => '<div class="stat"><div class="num">' + x[0] + '</div><div class="lab">' + x[1] + "</div></div>").join("");
+    $("selfMissed").innerHTML = d.missed_questions.length
+      ? d.missed_questions.map(m => '<div class="list-item"><span>' + esc(m.question) + "</span></div>").join("")
+      : "暂无数据（所有提问均命中知识库，继续保持！）";
+    $("selfWeak").innerHTML = d.weak_homework.length
+      ? d.weak_homework.map(w => '<div class="list-item"><span>' + esc(w.question_text) +
+        '</span><b style="color:var(--bad)">' + Math.round(w.score * 100) + "分</b></div>").join("")
+      : "暂无数据（自测成绩良好）";
+  } catch (e) { toast("自我评估加载失败：" + e.message); }
+}
+$("selfRefreshBtn").addEventListener("click", loadSelf);
+
+/* ---------- 教师：学情看板 / 薄弱点 ---------- */
+function hbars(container, rows, unit) {
+  const max = Math.max(...rows.map(r => r.v), 1);
+  container.innerHTML = rows.map(r =>
+    '<div class="hbar-row"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' +
+    esc(r.k) + '">' + esc(r.k) + '</span><div class="hbar"><div style="width:' +
+    Math.round(r.v / max * 100) + '%"></div></div><span style="text-align:right">' + r.v + (unit || "") + "</span></div>"
+  ).join("");
+}
+async function fetchInsight(days) {
+  return await api("/v1/insight?days=" + days);
+}
+async function loadInsight() {
+  try {
+    const d = await fetchInsight($("insightDays").value);
+    const fb = d.feedback || {};
+    $("statCards").innerHTML = [
+      [d.total_sessions, "会话数"], [d.total_questions, "提问数"],
+      [d.hit_rate == null ? "—" : (d.hit_rate * 100).toFixed(1) + "%", "知识库命中率"],
+      [fb.count || 0, "反馈数"], [fb.avg_rating == null ? "—" : fb.avg_rating.toFixed(2), "平均评分"]
+    ].map(x => '<div class="stat"><div class="num">' + x[0] + '</div><div class="lab">' + x[1] + "</div></div>").join("");
+    const daily = (d.daily_questions || []).map(x => ({ k: x.date, v: x.questions }));
+    daily.length ? hbars($("dailyChart"), daily, " 问") : $("dailyChart").textContent = "暂无数据";
+    const intents = (d.intent_distribution || []).map(x => ({ k: x.intent, v: x.c }));
+    intents.length ? hbars($("intentChart"), intents, " 次") : $("intentChart").textContent = "暂无数据";
+  } catch (e) { toast("学情加载失败：" + e.message); }
+}
+$("insightBtn").addEventListener("click", loadInsight);
+
+async function loadWeak() {
+  try {
+    const d = await fetchInsight($("weakDays").value);
+    $("weakTable").innerHTML = (d.weak_points || []).length
+      ? "<table><tr><th>题目来源</th><th>错误次数</th><th>平均得分</th><th>严重度</th></tr>" +
+        d.weak_points.map(w => {
+          const avg = w.avg_score == null ? "—" : w.avg_score.toFixed(2);
+          const sev = w.c >= 5 ? '<span class="tag warn">重点讲评</span>' : '<span class="tag">关注</span>';
+          return "<tr><td>" + esc(w.matched_source || "—") + "</td><td>" + w.c + "</td><td>" + avg + "</td><td>" + sev + "</td></tr>";
+        }).join("") + "</table>"
+      : "暂无数据（统计周期内无低于 0.6 分的作业记录）";
+    const intents = (d.intent_distribution || []).map(x => ({ k: x.intent, v: x.c }));
+    intents.length ? hbars($("weakIntent"), intents, " 次") : $("weakIntent").textContent = "暂无数据";
+  } catch (e) { toast("薄弱点加载失败：" + e.message); }
+}
+$("weakBtn").addEventListener("click", loadWeak);
+
+/* ---------- 教师：数据导出 ---------- */
+function bindExport(linkId, table) {
+  $(linkId).addEventListener("click", function () {
+    this.href = "/v1/export/" + table + "?days=" + $("exportDays").value;
+  });
+}
+bindExport("exportInteractions", "interactions");
+bindExport("exportHomework", "homework");
+bindExport("exportFeedback", "feedback");
+
+/* ---------- MCP 工具 ---------- */
+async function loadTools() {
+  try {
+    const d = await api("/v1/tools");
+    $("toolsList").innerHTML = (d.tools || []).map(t =>
+      '<div class="tool-card"><h3>' + esc(t.name) + "</h3><p>" + esc(t.description || "") + "</p>" +
+      "<pre>" + esc(JSON.stringify(t.inputSchema, null, 2)) + "</pre></div>"
+    ).join("") || '<span class="muted">无注册工具</span>';
+  } catch (e) { $("toolsList").innerHTML = '<span style="color:var(--bad)">加载失败：' + esc(e.message) + "</span>"; }
+}
+
+/* ============ 数字教师（1对1 AI 形象 + 语音，独立新增模块） ============ */
+const dt = { sessionId: null, busy: false, voiceOn: true };
+
+/* ---- 语音朗读（Web Speech API，中文） ---- */
+const dtVoice = {
+  _queue: [], _speaking: false, _audioCtx: null, _currentSource: null, _iframeReady: false,
+  ensureAudio() {
+    if (!this._audioCtx) this._audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (this._audioCtx.state === 'suspended') this._audioCtx.resume();
+  },
+  clean(text) {
+    return (text || '').replace(/[#*\>|_~]/g, '')
+      .replace(/\[([^\]]*)\]\([^)]*\)/g, '')
+      .replace(/\s+/g, ' ').trim();
+  },
+  async _fetchWav(text) {
+    const resp = await fetch('/v1/digital-teacher/tts', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({text, voice: 'yunjian', rate: '+12%'})
+    });
+    if (!resp.ok) throw new Error('TTS failed: ' + resp.status);
+    return await resp.blob();
+  },
+  _sendToDH(wavBlob) {
+    const frame = document.getElementById('dtAvaFrame');
+    if (!frame || !frame.contentWindow || !this._iframeReady) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const b64 = reader.result.indexOf(',') >= 0 ? reader.result.split(',')[1] : reader.result;
+      frame.contentWindow.postMessage({type: 'dh_audio', wavBase64: b64}, '*');
+    };
+    reader.readAsDataURL(wavBlob);
+  },
+  async _playWav(wavBlob) {
+    this.ensureAudio();
+    const buf = await wavBlob.arrayBuffer();
+    const audioBuf = await this._audioCtx.decodeAudioData(buf);
+    this._currentSource = this._audioCtx.createBufferSource();
+    this._currentSource.buffer = audioBuf;
+    this._currentSource.connect(this._audioCtx.destination);
+    return new Promise((resolve) => {
+      this._currentSource.onended = resolve;
+      this._currentSource.start(0);
+    });
+  },
+  async speak(text, opts) {
+    opts = opts || {};
+    if (!dt.voiceOn) { if (opts.onend) opts.onend(); return; }
+    const parts = this.clean(text).split(/(?<=[。！？!?；;])/).map(s => s.trim()).filter(Boolean);
+    if (!parts.length) { if (opts.onend) opts.onend(); return; }
+    this.stop();
+    if (opts.onstart) opts.onstart();
+    try {
+      for (const p of parts) {
+        if (!dt.voiceOn) break;
+        const wav = await this._fetchWav(p);
+        this._sendToDH(wav);
+        await this._playWav(wav);
+      }
+    } catch (e) { console.error('dtVoice speak error:', e); }
+    if (opts.onend) opts.onend();
+  },
+  stop() {
+    if (this._currentSource) { try { this._currentSource.stop(); } catch(e){} this._currentSource = null; }
+    this._queue = []; this._speaking = false;
+    const frame = document.getElementById('dtAvaFrame');
+    if (frame && frame.contentWindow) frame.contentWindow.postMessage({type: 'dh_clear'}, '*');
+  },
+  speakStream(text) {
+    if (!dt.voiceOn) return;
+    const parts = this.clean(text).split(/(?<=[。！？!?；;])/).map(s => s.trim()).filter(Boolean);
+    if (!parts.length) return;
+    if (!this._queue) this._queue = [];
+    for (const p of parts) this._queue.push(p);
+    if (this._speaking) return;
+    this._speaking = true;
+    this._drain();
+  },
+  async _drain() {
+    if (!dt.voiceOn || !this._queue || !this._queue.length) {
+      this._speaking = false;
+      if (dtAva) dtAva.idle();
+      return;
+    }
+    const text = this._queue.shift();
+    try {
+      const wav = await this._fetchWav(text);
+      this._sendToDH(wav);
+      await this._playWav(wav);
+    } catch (e) { console.error('dtVoice drain error:', e); }
+    this._drain();
+  }
+};
+/* ---- AI 形象控制 ---- */
+const dtAva = {
+  img: null, statusEl: null, tipEl: null, _timer: null, _greeted: false,
+  init() {
+    this.frame = $("dtAvaFrame"); this.statusEl = $("dtAvaStatus"); this.tipEl = $("dtAvaTip");
+    window.addEventListener("message", (e) => {
+      if (e.data && e.data.type === "dh_ready") { dtVoice._iframeReady = true; this.status("数字教师已就绪"); }
+    });
+    $("dtAvaHello").addEventListener("click", () => this.hello());
+    $("dtAvaStop").addEventListener("click", () => { dtVoice.stop(); this.idle(); });
+    $("dtVoiceToggle").addEventListener("click", () => {
+      dt.voiceOn = !dt.voiceOn;
+      if (!dt.voiceOn) dtVoice.stop();
+      $("dtVoiceToggle").textContent = dt.voiceOn ? "🔊 语音已开启" : "🔇 语音已关闭";
+      this.status(dt.voiceOn ? "语音已开启" : "语音已关闭");
+    });
+  },
+  status(t) { this.statusEl.textContent = t; },
+  tip(icon) {
+    if (icon) { this.tipEl.textContent = icon; this.tipEl.classList.add("show"); }
+    else { this.tipEl.classList.remove("show"); }
+  },
+  action(a) {
+    if (this._timer) { clearTimeout(this._timer); this._timer = null; }
+  },
+  idle() { this.action("idle"); this.tip(); this.status("已就绪，欢迎提问"); },
+  think(t) { this.action("think"); this.tip("🤔"); this.status(t); },
+  nod() { this.action("nod"); this.tip("👍"); this.status("明白了"); this._timer = setTimeout(() => this.idle(), 900); },
+  hello() {
+    this.action("wave"); this.tip("👋"); this.status("正在问候…");
+    dtVoice.speak("同学们好，我是《机器人学导论》课程的数字教师林老师。欢迎提问。", {
+      onstart: () => this.status("正在说话…"),
+      onend: () => this.idle(),
+    });
+  },
+  speak(text) {
+    this.action("speaking"); this.tip("🔊"); this.status("林老师 正在说话…");
+    dtVoice.speak(text, {
+      onstart: () => this.status("林老师 正在说话…"),
+      onend: () => this.idle(),
+    });
+  },
+};
+
+/* ---- 对话 ---- */
+function loadDigital() {
+  if (!dtAva._greeted) {
+    dtAva._greeted = true;
+    // 浏览器自动播放策略：AudioContext 需用户交互后才能启动
+    // 首次点击页面时播放开场白（只播一次）
+    const greetOnce = () => {
+      document.removeEventListener('click', greetOnce);
+      setTimeout(() => dtAva.hello(), 300);
+    };
+    document.addEventListener('click', greetOnce);
+  }
+}
+
+function dtAppend(kind, text) {
+  const box = $("dtMessages");
+  const el = document.createElement("div");
+  if (kind === "user") {
+    el.className = "dt-msg me";
+    el.innerHTML = '<span class="dt-who">我</span><div class="dt-bubble">' + fmt(text) + "</div>";
+    dtAva.nod();
+  } else if (kind === "teacher") {
+    el.className = "dt-msg them";
+    el.innerHTML = '<span class="dt-who">👨‍🏫 林老师 · <em>数字教师</em></span><div class="dt-bubble">' + fmt(text) + "</div>";
+  } else {
+    el.className = "dt-msg them";
+    el.innerHTML = '<span class="dt-who muted">系统</span><div class="dt-bubble">' + fmt(text) + "</div>";
+  }
+  box.appendChild(el);
+  box.scrollTop = box.scrollHeight;
+  return el;
+}
+
+/* 打字机显示：按标点切句逐句填充，体感与智能问答一致 */
+function dtAppendTypewriter(kind, text) {
+  const box = $("dtMessages");
+  const el = document.createElement("div");
+  el.className = kind === "user" ? "dt-msg me" : "dt-msg them";
+  el.innerHTML = kind === "user"
+    ? '<span class="dt-who">我</span>'
+    : '<span class="dt-who">🧑🏻‍🎓 林老师 · <em>数字教师</em></span>';
+  const bubble = document.createElement("div");
+  bubble.className = "dt-bubble";
+  el.appendChild(bubble);
+  box.appendChild(el);
+  const parts = text.match(/[^。！？；\n]+[。！？；]?/g) || [text];
+  let i = 0;
+  (function typeNext() {
+    if (i >= parts.length) return;
+    bubble.textContent += parts[i];
+    box.scrollTop = box.scrollHeight;
+    i += 1;
+    setTimeout(typeNext, 80);
+  })();
+  return el;
+}
+
+async function dtSend() {
+  const msg = $("dtInput").value.trim();
+  if (!msg) { toast("请输入问题"); return; }
+  if (dt.busy) return;
+  dtVoice.ensureAudio();
+  dt.busy = true;
+  $("dtSendBtn").disabled = true;
+  $("dtInput").disabled = true;
+  dtAppend("user", msg);
+  $("dtInput").value = "";
+  dtAva.think("正在检索知识库并思考");
+  try {
+    const resp = await fetch("/v1/digital-teacher/talk/stream", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: msg, session_id: dt.sessionId || null })
+    });
+    if (!resp.ok || !resp.body) throw new Error("HTTP " + resp.status);
+    const box = $("dtMessages");
+    const el = document.createElement("div");
+    el.className = "dt-msg them";
+    el.innerHTML = '<span class="dt-who">🧑🏻‍🎓 林老师 · <em>数字教师</em></span>';
+    const bubble = document.createElement("div");
+    bubble.className = "dt-bubble";
+    el.appendChild(bubble);
+    box.appendChild(el);
+    dtAva.action("speaking"); dtAva.tip("🔊"); dtAva.status("林老师 正在说话…");
+    dtVoice.stop(); dtVoice._queue = []; dtVoice._speaking = false;
+    const reader = resp.body.getReader();
+    const dec = new TextDecoder("utf-8");
+    let buf = "", full = "", got = false;
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buf += dec.decode(value, { stream: true });
+      const events = buf.split("\n\n");
+      buf = events.pop() || "";
+      for (const ev of events) {
+        const lines = ev.split("\n");
+        const type = (lines.find(l => l.startsWith("event:")) || "").slice(6).trim();
+        const dataLine = (lines.find(l => l.startsWith("data:")) || "").slice(5).trim();
+        if (!dataLine) continue;
+        const data = JSON.parse(dataLine);
+        if (type === "delta") {
+          bubble.textContent += data.text;
+          full += data.text;
+          got = true;
+          dtVoice.speakStream(data.text);
+          box.scrollTop = box.scrollHeight;
+        } else if (type === "done") {
+          if (data.session_id) dt.sessionId = data.session_id;
+        } else if (type === "error") {
+          throw new Error(data.detail || "服务异常");
+        }
+      }
+    }
+    if (!got) throw new Error("未收到回答");
+  } catch (e) {
+    dtAppend("system", "回答失败：" + e.message);
+    dtAva.idle();
+    toast("回答失败：" + e.message);
+  } finally {
+    dt.busy = false;
+    $("dtSendBtn").disabled = false;
+    $("dtInput").disabled = false;
+    $("dtInput").focus();
+    if (!dt.voiceOn) dtAva.idle();
+  }
+}
+
+/* ---- 语音输入（本地录音 → 离线识别，无需联网） ---- */
+const dtMic = {
+  chunks: [], actx: null, stream: null, node: null, src: null, _rate: 16000,
+  listening: false, _stopping: false, timer: null, vTimer: null, _lastPeak: 0,
+  supported() { return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia); },
+  // AudioWorklet 采集器源码（内联，无需外部文件）
+  _workletCode() {
+    return "class RecProc extends AudioWorkletProcessor { process(inputs) { " +
+      "const ch = inputs[0] && inputs[0][0]; if (ch) this.port.postMessage(ch.slice(0)); return true; } } " +
+      "registerProcessor('rec-proc', RecProc);";
+  },
+  async start() {
+    if (!this.supported()) { toast("当前浏览器不支持麦克风，请使用 Chrome / Edge"); return; }
+    if (this.listening) { this.stop(); return; }
+    let stream, actx;
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      actx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 16000 });
+      if (actx.state === "suspended") { try { await actx.resume(); } catch (e) { /* noop */ } }
+    } catch (err) {
+      const n = (err && err.name) || "";
+      toast("无法使用麦克风" + (n === "NotAllowedError" || n === "PermissionDeniedError" ? "（请在地址栏允许麦克风权限）" : "：" + n));
+      dtAva.idle();
+      return;
+    }
+    const rate = actx.sampleRate || 16000;
+    this._rate = rate;
+    const src = actx.createMediaStreamSource(stream);
+    const chunks = [];
+    let sil = 0, tot = 0, maxPeak = 0;
+    const me = this;
+    const onChunk = (d) => {
+      const buf = new Int16Array(d.length);
+      let peak = 0;
+      for (let i = 0; i < d.length; i++) {
+        const s = Math.max(-1, Math.min(1, d[i]));
+        buf[i] = s * 0x7fff;
+        const a = Math.abs(s); if (a > peak) peak = a;
+      }
+      chunks.push(buf); tot += d.length;
+      if (peak > maxPeak) maxPeak = peak;
+      me._lastPeak = peak;
+      me._maxPeak = Math.max(me._maxPeak || 0, peak);
+      if (peak < 0.012) sil += d.length / rate; else sil = 0;
+      const sec = tot / rate;
+      if (!me._stopping && ((sil >= 2 && sec >= 1.2) || sec >= 20)) me.stop();
+    };
+    // 首选 AudioWorklet（Chrome 更可靠）；失败则回退 ScriptProcessor
+    let node = null;
+    try {
+      if (actx.audioWorklet) {
+        const url = URL.createObjectURL(new Blob([this._workletCode()], { type: "application/javascript" }));
+        await actx.audioWorklet.addModule(url);
+        URL.revokeObjectURL(url);
+        node = new AudioWorkletNode(actx, "rec-proc");
+        node.port.onmessage = (e) => onChunk(e.data);
+        src.connect(node);
+      } else {
+        throw new Error("no-audio-worklet");
+      }
+    } catch (e) {
+      node = actx.createScriptProcessor(4096, 1, 1);
+      node.onaudioprocess = (e2) => onChunk(e2.inputBuffer.getChannelData(0));
+      src.connect(node);
+      node.connect(actx.destination);
+    }
+    this.actx = actx; this.stream = stream; this.node = node; this.src = src;
+    this.chunks = chunks; this._maxPeak = 0; this._lastPeak = 0;
+    this.listening = true; this._stopping = false;
+    $("dtMicBtn").classList.add("listening");
+    dtAva.think("正在聆听…请说话");
+    // 实时音量显示（每 150ms 更新状态栏）
+    this.vTimer = setInterval(() => {
+      if (!this.listening) return;
+      const p = this._lastPeak;
+      const bars = p < 0.02 ? "▁" : p < 0.08 ? "▂▄" : p < 0.2 ? "▄▆" : "▆▇█";
+      this.statusEl().textContent = "正在聆听… 音量 " + bars;
+    }, 150);
+    this.timer = setTimeout(() => this.stop(), 22000);
+  },
+  statusEl() { return document.getElementById("dtAvaStatus"); },
+  stop() {
+    if (!this.listening) return;
+    this.listening = false; this._stopping = true;
+    clearTimeout(this.timer);
+    clearInterval(this.vTimer);
+    $("dtMicBtn").classList.remove("listening");
+    dtAva.think("正在识别…");
+    try { if (this.stream) this.stream.getTracks().forEach(t => t.stop()); } catch (e) { /* noop */ }
+    try { if (this.node && this.node.port) this.node.port.onmessage = null; } catch (e) { /* noop */ }
+    try { if (this.node && this.node.disconnect) this.node.disconnect(); } catch (e) { /* noop */ }
+    try { if (this.src) this.src.disconnect(); } catch (e) { /* noop */ }
+    try { if (this.actx) this.actx.close(); } catch (e) { /* noop */ }
+    const total = this.chunks.reduce((n, b) => n + b.length, 0);
+    const rate = this._rate || 16000;
+    const sec = total / rate;
+    const wav = this.encodeWav(this.chunks, rate);
+    this.chunks = []; this.actx = null; this.stream = null; this.node = null; this.src = null;
+    const maxPeak = this._maxPeak || 0;
+    if (sec < 0.5) {
+      toast("说话时间太短，请再试一次"); dtAva.idle(); this._stopping = false; return;
+    }
+    if (maxPeak < 0.02) {
+      toast("没有听到声音（录音" + sec.toFixed(1) + "秒/音量峰值" + (maxPeak * 100).toFixed(0) + "%），请靠近麦克风说话，或检查系统麦克风是否被静音"); dtAva.idle(); this._stopping = false; return;
+    }
+    this._upload(wav).then((text) => {
+      this._stopping = false;
+      if (text) { $("dtInput").value = text; dtAva.nod(); dtSend(); }
+      else {
+        console.log("[dtMic] 识别为空 时长=", sec.toFixed(1), "s 采样率=", rate, "Hz 峰值=", maxPeak.toFixed(3), "样本=", total);
+        toast("没有听清（录音" + sec.toFixed(1) + "秒/" + rate + "Hz，请稍大声、慢一点再试）");
+        dtAva.idle();
+      }
+    }).catch((err) => {
+      this._stopping = false;
+      toast("识别失败：" + err.message);
+      dtAva.idle();
+    });
+  },
+  encodeWav(chunks, rate) {
+    const len = chunks.reduce((n, b) => n + b.length, 0);
+    const buf = new ArrayBuffer(44 + len * 2);
+    const v = new DataView(buf);
+    const wstr = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
+    wstr(0, "RIFF"); v.setUint32(4, 36 + len * 2, true); wstr(8, "WAVE");
+    wstr(12, "fmt "); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+    v.setUint32(24, rate, true); v.setUint32(28, rate * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true);
+    wstr(36, "data"); v.setUint32(40, len * 2, true);
+    let o = 44;
+    for (const b of chunks) { for (let i = 0; i < b.length; i++) { v.setInt16(o, b[i], true); o += 2; } }
+    return new Blob([buf], { type: "audio/wav" });
+  },
+  async _upload(blob) {
+    const fd = new FormData();
+    fd.append("file", blob, "speech.wav");
+    const r = await fetch("/v1/digital-teacher/asr", { method: "POST", body: fd });
+    if (!r.ok) { const e = await r.json().catch(() => ({})); throw new Error(e.detail || ("HTTP " + r.status)); }
+    const d = await r.json();
+    return (d.text || "").trim();
+  },
+};
+dtAva.init();
+$("dtMicBtn").addEventListener("click", function () {
+  if (dtMic.listening) { dtMic.stop(); } else { dtMic.start(); }
+});
+$("dtSendBtn").addEventListener("click", dtSend);
+$("dtInput").addEventListener("keydown", function (e) {
+  if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); dtSend(); }
+});
+</script>
+</body>
+</html>
